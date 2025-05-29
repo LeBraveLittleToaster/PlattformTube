@@ -1,0 +1,10 @@
+#ifndef HARDWARECONFIG_H
+#define HARDWARECONFIG_H
+
+#define LED_DATA_PIN 7
+#define NUM_LEDS 144
+#define DMX_RX_PIN 3
+#define LED_DRIVER_WS2812
+#define DMX_DRIVER_MAX485
+
+#endif // HARDWARECONFIG_H

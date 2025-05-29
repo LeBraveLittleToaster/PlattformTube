@@ -1,0 +1,64 @@
+@startuml LighttubeModular
+
+interface ILEDDriver {
+  + begin()
+  + setPixel(index: int, color: CRGB)
+  + show()
+  + clear()
+  + setBrightness(level: uint8_t)
+}
+
+interface IDMXReceiver {
+  + begin()
+  + readData(): bool
+  + getChannel(channel: int): uint8_t
+}
+
+class Lighttube {
+  - dmx: IDMXReceiver
+  - leds: ILEDDriver
+  - config: ConfigManager
+  - effects: EffectManager
+  + setup()
+  + loop()
+}
+
+class DMXMAX485 implements IDMXReceiver {
+  - rxPin: int
+  - buffer: uint8_t[512]
+  + begin()
+  + readData(): bool
+  + getChannel(channel: int): uint8_t
+}
+
+class WS2812Driver implements ILEDDriver {
+  - dataPin: int
+  - numLeds: int
+  + begin()
+  + setPixel(index: int, color: CRGB)
+  + show()
+  + clear()
+  + setBrightness(level: uint8_t)
+}
+
+class ConfigManager {
+  - dmxAddress: int
+  + loadFromEEPROM()
+  + saveToEEPROM()
+  + getAddress(): int
+}
+
+class EffectManager {
+  - currentEffect: int
+  + applyEffect()
+  + setEffect(id: int)
+}
+
+Lighttube --> IDMXReceiver
+Lighttube --> ILEDDriver
+Lighttube --> ConfigManager
+Lighttube --> EffectManager
+DMXMAX485 ..|> IDMXReceiver
+WS2812Driver ..|> ILEDDriver
+
+@enduml
