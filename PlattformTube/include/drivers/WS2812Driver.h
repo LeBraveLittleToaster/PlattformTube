@@ -11,15 +11,18 @@ public:
     void setBrightness(uint8_t brightness);
     void clear() override;
     void show() override;
+    uint8_t getBrightness() override;
+    uint32_t getPixelValue(uint8_t idx) override;
     void setPixelRGB(int idx, uint8_t r, uint8_t g, uint8_t b, uint8_t w) override;
     void setPixelHSV8(int idx, uint8_t h, uint8_t s, uint8_t v, uint8_t w) override;
     void setPixelHSV16(int idx, uint16_t h, uint8_t s, uint8_t v, uint8_t w) override;
+    uint8_t getTotalPixelCount() override;
     ~WS2812Driver();
 
 private:
     int dataPin;
     int numLeds;
-    Adafruit_NeoPixel* leds;
+    Adafruit_NeoPixel* driver;
 };
 
 #endif // WS2812DRIVER_H

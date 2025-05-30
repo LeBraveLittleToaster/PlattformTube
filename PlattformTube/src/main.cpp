@@ -16,21 +16,19 @@ DMXMAX485 dmxDriver(Serial1, DMX_RX_PIN);
 #endif
 
 Ticker ticker;
-Lighttube tube {&dmxDriver, &ledDriver};
+
+Lighttube tube {&dmxDriver, &ledDriver, &ticker, 3};
 
 void setup()
 {
   Serial.begin(115200);
   tube.setup();
 
+  Serial.println("Starting Ticker...");
   ticker.start();
 }
 
 void loop()
 {
   tube.loop();
-  // One tick in 44hz DMX update frequency
-  unsigned long delayMillis = ticker.delayTillNextTick();
-  // delayMillis is the amount of time it was delayed (if 0, code is slower then 1/44 of a second and need optimization)
-  Serial.println(delayMillis);
 }
