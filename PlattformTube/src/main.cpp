@@ -1,4 +1,4 @@
-#include <control/TickController.hpp>
+#include "control/Ticker.h"
 #include <Adafruit_NeoPixel.h>
 // Which pin on the Arduino is connected to the NeoPixels?
 // On a Trinket or Gemma we suggest changing this to 1:
@@ -18,15 +18,27 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_RGBW + NEO_KHZ800);
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 
+Ticker ticker;
 
 void setup()
 {
+  Serial.begin(115200);
   strip.begin();
-  strip.show(); // Initialize all pixels to 'off'
+  strip.show();
+  ticker.start();
 }
 
 void loop()
 {
-  
+
+  for (int i = 0; i < LED_COUNT; i++)
+  {
+    strip.clear();
+    strip.setPixelColor(i, 0, 0, 255, 0);
+    strip.show();
+    // One tick in 44hz DMX update frequency
+    unsigned long delayMillis = ticker.delayTillNextTick();
+    // delayMillis is the amount of time it was delayed (if 0, code is slower then 1/44 of a second and need optimization)
+    Serial.println(delayMillis);
+  }
 }
-  
