@@ -1,4 +1,4 @@
-#include "ConfigManager.h"
+#include "control/ConfigManager.h"
 #include <EEPROM.h>
 
 void ConfigManager::loadFromEEPROM() {

@@ -9,8 +9,9 @@ public:
     virtual void setBrightness(uint8_t brightness) = 0;
     virtual void clear() = 0;
     virtual void show() = 0;
-    virtual void setPixel(int idx, uint8_t r, uint8_t g, uint8_t b) = 0;
-    virtual ~ILEDDriver() {}
+    virtual void setPixelRGB(int idx, uint8_t r, uint8_t g, uint8_t b, uint8_t w) = 0;
+    virtual void setPixelHSV(int idx, uint8_t h, uint8_t s, uint8_t v, uint8_t w) = 0;
+    virtual ~ILEDDriver() = default;
 };
 
 #endif // ILED_DRIVER_H

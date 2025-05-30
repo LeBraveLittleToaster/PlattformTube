@@ -1,7 +1,7 @@
 #ifndef DMXMAX485_H
 #define DMXMAX485_H
 
-#include "IDMXReceiver.h"
+#include "control/IDMXReceiver.h"
 #include <HardwareSerial.h>
 
 class DMXMAX485 : public IDMXReceiver {

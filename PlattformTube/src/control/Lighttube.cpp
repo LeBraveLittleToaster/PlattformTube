@@ -1,5 +1,5 @@
-#include "Lighttube.h"
-#include "HardwareConfig.h"
+#include "control/Lighttube.h"
+#include "config/HardwareConfig.h"
 
 // Example dimmer curves
 static uint8_t dimmerCurve1(uint8_t value) {
@@ -47,8 +47,10 @@ void Lighttube::loop() {
             r = (r * dimmerFunc(globalDimmer)) / 255;
             g = (g * dimmerFunc(globalDimmer)) / 255;
             b = (b * dimmerFunc(globalDimmer)) / 255;
-            leds->setPixel(i, r, g, b);
+            leds->setPixelRGB(i, r, g, b, 0);
         }
         leds->show();
+    }else {
+        Serial.println("No data");
     }
 }

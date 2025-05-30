@@ -1,4 +1,4 @@
-#include "DMXMAX485.h"
+#include "drivers/DMXMAX485.h"
 
 DMXMAX485::DMXMAX485(HardwareSerial& serial, int rxPin)
     : serial(serial), rxPin(rxPin) {}

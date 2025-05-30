@@ -2,7 +2,7 @@
 #define LIGHTTUBE_H
 
 #include "IDMXReceiver.h"
-#include "ILEDDriver.h"
+#include "drivers/ILEDDriver.h"
 #include "ConfigManager.h"
 
 class Lighttube {
