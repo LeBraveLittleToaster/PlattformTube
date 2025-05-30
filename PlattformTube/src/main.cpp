@@ -21,9 +21,10 @@ Lighttube tube {&dmxDriver, &ledDriver, &ticker, 3};
 
 void setup()
 {
+  delay(1000);
   Serial.begin(115200);
   tube.setup();
-
+  tube.print();
   Serial.println("Starting Ticker...");
   ticker.start();
 }

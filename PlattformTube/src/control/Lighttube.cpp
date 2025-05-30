@@ -13,15 +13,33 @@ static uint8_t dimmerCurve2(uint8_t value)
     return (value * value) / 255;
 }
 
+void Lighttube::print() {
+    Serial.println("Lighttube");
+    Serial.print("Segments: ");
+    Serial.println(segmentCount);
+    for(uint8_t i = 0; i < segmentCount; i++) {
+        Serial.print("Segment Index: ");
+        Serial.println(i);
+        segments[i].print();
+    }
+    
+}
+
 Lighttube::Lighttube(IDMXReceiver *dmx, ILEDDriver *driver, Ticker *ticker, int segmentCount)
     : dmx(dmx), leds(driver), ticker(ticker), segmentCount(segmentCount)
 {
     uint8_t numLeds = driver->getTotalPixelCount();
     segments = new TubeSegment[numLeds];
-    for (uint8_t ledIdx = 0; ledIdx < segmentCount; ledIdx++)
+
+    uint8_t ledsPerSegment = numLeds / segmentCount;
+    for (uint8_t segmentIdx = 0; segmentIdx < segmentCount; segmentIdx++)
     {
-        segments[ledIdx] = TubeSegment{
-            numLeds, ledIdx, ledIdx + (numLeds / segmentCount), driver};
+        uint8_t startIndex = segmentIdx * ledsPerSegment;
+        uint8_t endIndex = segmentIdx * ledsPerSegment + (ledsPerSegment - 1);
+        if(endIndex + (ledsPerSegment) >= numLeds){
+            endIndex = numLeds - 1;
+        }
+        segments[segmentIdx] = TubeSegment{numLeds, startIndex, endIndex, driver};
     }
 }
 
@@ -49,7 +67,16 @@ void Lighttube::loop()
     bool dmxPresent = random(300) == 1;
     for(int segmentIdx = 0; segmentIdx < segmentCount; segmentIdx++){
         if(dmxPresent){
-            segments[segmentIdx].loopWithDmx(SegmentValue{255,0,0,0}, DimmerCurve::LINEAR);
+            //Else if only for testing
+            if(segmentIdx == 0){
+                segments[segmentIdx].loopWithDmx(SegmentValue{255,0,0,0}, DimmerCurve::LINEAR);
+            }else if(segmentIdx == 1){
+                segments[segmentIdx].loopWithDmx(SegmentValue{0, 255,0,0}, DimmerCurve::LINEAR);
+            }else if(segmentIdx == 2){
+                segments[segmentIdx].loopWithDmx(SegmentValue{0,0,255,0}, DimmerCurve::LINEAR);
+            }else {
+                segments[segmentIdx].loopWithDmx(SegmentValue{255,255,255,0}, DimmerCurve::LINEAR);
+            }
         }else {
             segments[segmentIdx].loopWithoutDmx(DimmerCurve::LINEAR);
         }

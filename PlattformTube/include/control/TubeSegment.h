@@ -18,6 +18,7 @@ class TubeSegment {
     public:
         TubeSegment();
         TubeSegment(int totalNumLeds, int startIdx, int endIdx, ILEDDriver *driver);
+        void print();
         void loopWithDmx(SegmentValue segmentValues, DimmerCurve dimmerCurve);
         void loopWithoutDmx(DimmerCurve dimmerCurve);
     private:

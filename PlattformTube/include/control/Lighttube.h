@@ -12,6 +12,7 @@ public:
     Lighttube(IDMXReceiver* dmx, ILEDDriver* leds, Ticker* ticker, int segmentCount);
     void setup();
     void loop();
+    void print();
     ~Lighttube();
 
 private:

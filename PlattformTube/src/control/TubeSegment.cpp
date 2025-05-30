@@ -14,13 +14,22 @@ TubeSegment::TubeSegment(int totalNumLeds, int startIdx, int endIdx, ILEDDriver 
 void TubeSegment::loopWithDmx(SegmentValue segmentValues, DimmerCurve dimmerCurve)
 {
     Serial.println("Flashing...");
-    for (int i = 0; i < endIdx; i++)
+    for (int i = startIdx; i <= endIdx; i++)
     {
         driver->setPixelRGB(i, segmentValues.r, segmentValues.g, segmentValues.b, segmentValues.white);
     }
     driver->setBrightness(255);
     driver->show();
 }
+
+void TubeSegment::print() {
+    Serial.print("Start Index: ");
+    Serial.print(startIdx);
+    Serial.print(" End Index: ");
+    Serial.println(endIdx);
+    
+}
+
 void TubeSegment::loopWithoutDmx(DimmerCurve dimmerCurve)
 {
     uint8_t decay = 3;
