@@ -12,7 +12,8 @@ public:
     void clear() override;
     void show() override;
     void setPixelRGB(int idx, uint8_t r, uint8_t g, uint8_t b, uint8_t w) override;
-    void setPixelHSV(int idx, uint8_t h, uint8_t s, uint8_t v, uint8_t w) override;
+    void setPixelHSV8(int idx, uint8_t h, uint8_t s, uint8_t v, uint8_t w) override;
+    void setPixelHSV16(int idx, uint16_t h, uint8_t s, uint8_t v, uint8_t w) override;
     ~WS2812Driver();
 
 private:

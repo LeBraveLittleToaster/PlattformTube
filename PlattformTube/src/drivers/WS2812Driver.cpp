@@ -50,7 +50,17 @@ void WS2812Driver::setPixelRGB(int idx, uint8_t r, uint8_t g, uint8_t b, uint8_t
     }
 }
 
-void WS2812Driver::setPixelHSV(int idx, uint8_t h, uint8_t s, uint8_t v, uint8_t w)
+void WS2812Driver::setPixelHSV8(int idx, uint8_t h, uint8_t s, uint8_t v, uint8_t w)
+{
+    uint16_t h16 = (uint16_t)h * 257;
+    if (idx >= 0 && idx < numLeds)
+    {
+        uint32_t rgb = leds->gamma32(leds->ColorHSV(h16,s,v));
+        leds->setPixelColor(idx, rgb);
+    }
+}
+
+void WS2812Driver::setPixelHSV16(int idx, uint16_t h, uint8_t s, uint8_t v, uint8_t w)
 {
     if (idx >= 0 && idx < numLeds)
     {
