@@ -7,6 +7,7 @@ static uint8_t dimmerCurve1(uint8_t value)
     // Linear dimmer curve
     return value;
 }
+
 static uint8_t dimmerCurve2(uint8_t value)
 {
     // S-curve (quadratic)
@@ -64,22 +65,38 @@ void Lighttube::loop()
     // delayMillis is the amount of time it was delayed (if 0, code is slower then 1/44 of a second and need optimization)
     unsigned long delayMillis = ticker->delayTillNextTick();
     
-    bool dmxPresent = random(300) == 1;
-    for(int segmentIdx = 0; segmentIdx < segmentCount; segmentIdx++){
-        if(dmxPresent){
-            //Else if only for testing
-            if(segmentIdx == 0){
-                segments[segmentIdx].loopWithDmx(SegmentValue{255,0,0,0}, DimmerCurve::LINEAR);
-            }else if(segmentIdx == 1){
-                segments[segmentIdx].loopWithDmx(SegmentValue{0, 255,0,0}, DimmerCurve::LINEAR);
-            }else if(segmentIdx == 2){
-                segments[segmentIdx].loopWithDmx(SegmentValue{0,0,255,0}, DimmerCurve::LINEAR);
-            }else {
-                segments[segmentIdx].loopWithDmx(SegmentValue{255,255,255,0}, DimmerCurve::LINEAR);
-            }
-        }else {
+    bool dmxPresent = dmx->readData();
+
+    // for simple testing of strip
+
+    for (int segmentIdx = 0; segmentIdx < segmentCount; segmentIdx++) {
+        if (dmxPresent) {
+            // Example: Use DMX channels to control each segment
+            // Adjust channel mapping as needed for your application
+            uint8_t r = dmx->getChannel(1 + segmentIdx * 3);     // Red
+            uint8_t g = dmx->getChannel(2 + segmentIdx * 3);     // Green
+            uint8_t b = dmx->getChannel(3 + segmentIdx * 3);     // Blue
+            uint8_t w = 0; // Or use another DMX channel if needed
+
+            segments[segmentIdx].loopWithDmx(SegmentValue{r, g, b, w}, DimmerCurve::LINEAR);
+        } else {
             segments[segmentIdx].loopWithoutDmx(DimmerCurve::LINEAR);
         }
     }
-    
+    // for(int segmentIdx = 0; segmentIdx < segmentCount; segmentIdx++){
+    //     if(dmxPresent){
+    //         //Else if only for testing
+    //         if(segmentIdx == 0){
+    //             segments[segmentIdx].loopWithDmx(SegmentValue{255,0,0,0}, DimmerCurve::LINEAR);
+    //         }else if(segmentIdx == 1){
+    //             segments[segmentIdx].loopWithDmx(SegmentValue{0, 255,0,0}, DimmerCurve::LINEAR);
+    //         }else if(segmentIdx == 2){
+    //             segments[segmentIdx].loopWithDmx(SegmentValue{0,0,255,0}, DimmerCurve::LINEAR);
+    //         }else {
+    //             segments[segmentIdx].loopWithDmx(SegmentValue{255,255,255,0}, DimmerCurve::LINEAR);
+    //         }
+    //     }else {
+    //         segments[segmentIdx].loopWithoutDmx(DimmerCurve::LINEAR);
+    //     }
+    // }
 }

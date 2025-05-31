@@ -13,7 +13,7 @@ TubeSegment::TubeSegment(int totalNumLeds, int startIdx, int endIdx, ILEDDriver 
 
 void TubeSegment::loopWithDmx(SegmentValue segmentValues, DimmerCurve dimmerCurve)
 {
-    Serial.println("Flashing...");
+    // Serial.println("Flashing...");
     for (int i = startIdx; i <= endIdx; i++)
     {
         driver->setPixelRGB(i, segmentValues.r, segmentValues.g, segmentValues.b, segmentValues.white);
