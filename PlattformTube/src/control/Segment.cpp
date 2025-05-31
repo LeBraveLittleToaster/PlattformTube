@@ -1,17 +1,17 @@
 #include "drivers/ILEDDriver.h"
-#include "control/TubeSegment.h"
+#include "control/Segment.h"
 #include "Arduino.h"
 
-TubeSegment::TubeSegment()
+Segment::Segment()
 {
 }
 
-TubeSegment::TubeSegment(int totalNumLeds, int startIdx, int endIdx, ILEDDriver *driver)
+Segment::Segment(int totalNumLeds, int startIdx, int endIdx, ILEDDriver *driver)
     : totalNumLeds(totalNumLeds), startIdx(startIdx), endIdx(endIdx), driver(driver)
 {
 }
 
-void TubeSegment::loopWithDmx(SegmentValue segmentValues, DimmerCurve dimmerCurve)
+void Segment::loopWithDmx(SegmentValue segmentValues, DimmerCurve dimmerCurve)
 {
     Serial.println("Flashing...");
     for (int i = startIdx; i <= endIdx; i++)
@@ -22,7 +22,7 @@ void TubeSegment::loopWithDmx(SegmentValue segmentValues, DimmerCurve dimmerCurv
     driver->show();
 }
 
-void TubeSegment::print() {
+void Segment::print() {
     Serial.print("Start Index: ");
     Serial.print(startIdx);
     Serial.print(" End Index: ");
@@ -30,7 +30,7 @@ void TubeSegment::print() {
     
 }
 
-void TubeSegment::loopWithoutDmx(DimmerCurve dimmerCurve)
+void Segment::loopWithoutDmx(DimmerCurve dimmerCurve)
 {
     uint8_t decay = 3;
     uint8_t brightness = 0;
