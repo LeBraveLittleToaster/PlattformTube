@@ -2,42 +2,38 @@
 #include "control/Segment.h"
 #include "Arduino.h"
 
+/**
+ * @brief Default constructor for Segment.
+ * 
+ * Initializes an empty segment. Members are left uninitialized.
+ * This could lead to undefined behavior unless explicitly set later.
+ */
 Segment::Segment()
 {
+    totalNumLeds = 0;
+    startIdx = 0;
+    endIdx = 0;
 }
 
-Segment::Segment(int totalNumLeds, int startIdx, int endIdx, ILEDDriver *driver)
-    : totalNumLeds(totalNumLeds), startIdx(startIdx), endIdx(endIdx), driver(driver)
+/**
+ * @brief Constructs a Segment with start and end indices.
+ * 
+ * @param totalNumLeds Total number of LEDs in the driver (not used internally here).
+ * @param startIdx Starting index of the segment (inclusive).
+ * @param endIdx Ending index of the segment (exclusive or inclusive depending on usage).
+ */
+Segment::Segment(int totalNumLeds, int startIdx, int endIdx)
+    : totalNumLeds(totalNumLeds), startIdx(startIdx), endIdx(endIdx)
 {
+    // This constructor sets all required fields.
 }
 
-void Segment::loopWithDmx(SegmentValue segmentValues, DimmerCurve dimmerCurve)
-{
-    Serial.println("Flashing...");
-    for (int i = startIdx; i <= endIdx; i++)
-    {
-        driver->setPixelRGB(i, segmentValues.r, segmentValues.g, segmentValues.b, segmentValues.white);
-    }
-    driver->setBrightness(255);
-    driver->show();
-}
-
+/**
+ * @brief Prints the segment's start and end indices via Serial.
+ */
 void Segment::print() {
     Serial.print("Start Index: ");
     Serial.print(startIdx);
     Serial.print(" End Index: ");
     Serial.println(endIdx);
-    
-}
-
-void Segment::loopWithoutDmx(DimmerCurve dimmerCurve)
-{
-    uint8_t decay = 3;
-    uint8_t brightness = 0;
-    if (driver->getBrightness() > decay)
-    {
-        brightness = driver->getBrightness() - decay;
-    }
-    driver->setBrightness(brightness);
-    driver->show();
 }
