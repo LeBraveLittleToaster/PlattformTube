@@ -1,18 +1,30 @@
 #ifndef TICKER_H
 #define TICKER_H
 
-#include <Arduino.h>
-
-class Ticker {
+class Ticker
+{
 public:
+    
+    Ticker(unsigned long interval);
+
     void start();
-    // Waits until the next tick and returns how long it delayed
-    unsigned long delayTillNextTick();
-    unsigned long delayOneSecond();
+
+    /**
+     * Checks if the tick interval has elapsed.
+     */
+    bool isTickReady();
+
+    /**
+     * Returns remaining time until next tick.
+     */
+    unsigned long timeUntilNextTick();
 
 private:
+    /**
+     * Set the interval between ticks (in milliseconds).
+     */
+    unsigned long interval = 1000;
     unsigned long lastTimestamp = 0;
-    static const unsigned long interval = 23; // milliseconds (approx 44Hz)
 };
 
 #endif // TICKER_H

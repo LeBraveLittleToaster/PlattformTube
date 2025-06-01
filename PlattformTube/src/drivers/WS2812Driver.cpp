@@ -1,11 +1,11 @@
 #include "config/HardwareConfig.h"
 #include "drivers/WS2812Driver.h"
 #include <Adafruit_NeoPixel.h>
+#include <Arduino.h>
 
 WS2812Driver::WS2812Driver(int dataPin, int numLeds)
     : dataPin(dataPin), numLeds(numLeds)
 {
-    
 }
 
 WS2812Driver::~WS2812Driver()
@@ -25,12 +25,11 @@ void WS2812Driver::begin()
     Serial.println(numLeds);
     Serial.print("LED Pin:");
     Serial.println(dataPin);
-    
+
     strip = new Adafruit_NeoPixel(numLeds, dataPin, NEO_GRB + NEO_KHZ800);
     strip->setBrightness(255);
     strip->clear();
     strip->show();
-    
 }
 
 uint8_t WS2812Driver::getBrightness()

@@ -13,9 +13,9 @@ WS2812Driver ledDriver(LED_DATA_PIN, NUM_LEDS);
 DMXMAX485 dmxDriver(Serial1, DMX_RX_PIN);
 #endif
 
-Ticker ticker;
+Ticker ticker{23};
 
-LightTube tube{&dmxDriver , &ticker, nullptr, getDMXPlayer(DmxMode::DMX_4, SEGMENTS, &ledDriver)};
+LightTube tube{&dmxDriver , &ticker, nullptr, getDMXPlayer(DmxMode::DMX_32, SEGMENTS, &ledDriver)};
 
 void setup()
 {

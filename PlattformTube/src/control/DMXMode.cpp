@@ -1,5 +1,12 @@
 #include "control/DMXMode.h"
 
+/**
+ * @brief Extracts a single DMX channel value from the buffer.
+ * 
+ * @param buffer DMX input buffer (512 bytes).
+ * @param dmxAdr DMX start address (0-based).
+ * @return DMX1 Struct containing one DMX channel value. Returns 0 if out of bounds.
+ */
 DMX1 getDMX1FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr)
 {
     if (dmxAdr > 512 - 1)
@@ -9,6 +16,13 @@ DMX1 getDMX1FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr)
     return DMX1{buffer[dmxAdr]};
 }
 
+/**
+ * @brief Extracts four consecutive DMX channel values from the buffer.
+ * 
+ * @param buffer DMX input buffer (512 bytes).
+ * @param dmxAdr DMX start address.
+ * @return DMX4 Struct with four DMX channel values. Returns default if out of bounds.
+ */
 DMX4 getDMX4FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr)
 {
     if (dmxAdr > 512 - 5)
@@ -18,6 +32,13 @@ DMX4 getDMX4FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr)
     return DMX4{buffer[dmxAdr], buffer[dmxAdr + 1], buffer[dmxAdr + 2], buffer[dmxAdr + 3]};
 }
 
+/**
+ * @brief Extracts 8 segments of 4-channel DMX data (total 32 channels) from the buffer.
+ * 
+ * @param buffer DMX input buffer (512 bytes).
+ * @param dmxAdr DMX start address.
+ * @return DMX32 Struct with 8 DMX4 segments. Returns default if out of bounds.
+ */
 DMX32 getDMX32FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr)
 {
     if (dmxAdr > 512 - 32)
@@ -33,6 +54,13 @@ DMX32 getDMX32FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr)
     return dmx32;
 }
 
+/**
+ * @brief Extracts 16 segments of 4-channel DMX data (total 64 channels) from the buffer.
+ * 
+ * @param buffer DMX input buffer (512 bytes).
+ * @param dmxAdr DMX start address.
+ * @return DMX64 Struct with 16 DMX4 segments. Returns default if out of bounds.
+ */
 DMX64 getDMX64FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr)
 {
     if (dmxAdr > 512 - 64)

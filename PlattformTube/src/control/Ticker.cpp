@@ -1,30 +1,46 @@
 #include <Arduino.h>
 #include "control/Ticker.h"
 
+Ticker::Ticker(unsigned long interval) : interval(interval){}
+
+/**
+ * @brief Starts the ticker by recording the current time.
+ */
 void Ticker::start()
 {
     this->lastTimestamp = millis();
 }
-unsigned long Ticker::delayTillNextTick()
+
+/**
+ * @brief Checks if it's time for the next tick.
+ * 
+ * Call this repeatedly (e.g., inside `loop()`), and when it returns true,
+ * perform your tick logic. No blocking delay is used.
+ * 
+ * @return True if the interval has elapsed since the last tick.
+ */
+bool Ticker::isTickReady()
 {
     unsigned long currentMillis = millis();
-    unsigned long nextTickMillis = this->lastTimestamp + (this->interval);
-    
-    
-    if (nextTickMillis < currentMillis)
+    if (currentMillis - lastTimestamp >= interval)
     {
-        this->lastTimestamp = nextTickMillis;
-        return 0;
+        lastTimestamp += interval;
+        return true;
     }
-    this->lastTimestamp = nextTickMillis;
-    unsigned long delayMillis = nextTickMillis - currentMillis;
-    
-    delay(delayMillis);
-    return delayMillis;
+    return false;
 }
 
-unsigned long Ticker::delayOneSecond()
+/**
+ * @brief Returns how long (in ms) until the next tick.
+ * 
+ * @return Milliseconds until the next scheduled tick.
+ */
+unsigned long Ticker::timeUntilNextTick()
 {
-    delay(1000);
-    return 1000;
+    unsigned long currentMillis = millis();
+    if (currentMillis - lastTimestamp >= interval)
+    {
+        return 0;
+    }
+    return interval - (currentMillis - lastTimestamp);
 }
