@@ -16,22 +16,14 @@ static uint8_t dimmerCurve2(uint8_t value)
 
 void LightTube::print()
 {
-    Serial.println("Lighttube");
-    Serial.print("Segments: ");
-    Serial.println(segmentCount);
-    for (uint8_t i = 0; i < segmentCount; i++)
-    {
-        Serial.print("Segment Index: ");
-        Serial.println(i);
-        segments[i].print();
-    }
+    Serial.println("LightTube");
 }
 
-LightTube::LightTube(IDMXReceiver *dmx, ILEDDriver *driver, Ticker *ticker, int segmentCount)
-    : dmx(dmx), leds(driver), ticker(ticker), segmentCount(segmentCount)
+DMXPlayer getDMXPlayer(DmxMode dmxMode, int segmentCount, ILEDDriver *driver)
 {
     uint8_t numLeds = driver->getTotalPixelCount();
-    segments = new Segment[numLeds];
+
+    Segment* segments = new Segment[numLeds];
 
     uint8_t ledsPerSegment = numLeds / segmentCount;
     for (uint8_t segmentIdx = 0; segmentIdx < segmentCount; segmentIdx++)
@@ -44,30 +36,39 @@ LightTube::LightTube(IDMXReceiver *dmx, ILEDDriver *driver, Ticker *ticker, int 
         }
         segments[segmentIdx] = Segment{numLeds, startIndex, endIndex, driver};
     }
+    switch(dmxMode) {
+        case DmxMode::DMX_1:
+            return DMX1Player(segments, segmentCount, driver);
+        case DmxMode::DMX_4:
+            return DMX4Player(segments, segmentCount, driver);
+        case DmxMode::DMX_32:
+            return DMX32Player(segments, segmentCount, driver);
+        case DmxMode::DMX_64:
+            return DMX64Player(segments, segmentCount, driver);
+    }
+}
+
+LightTube::LightTube(IDMXReceiver *dmx, ILEDDriver *driver, Ticker *ticker, uint8_t segmentCount, DmxMode dmxMode)
+{
+    dmxPlayer = getDMXPlayer(dmxMode, segmentCount, driver);
 }
 
 LightTube::~LightTube()
 {
-    delete[] segments;
+    //TODO proper destructor
+    //delete dmxPlayer;
 }
 
 void LightTube::setup()
 {
+    /*
     dmx->begin();
     leds->begin();
     config.loadFromEEPROM();
     leds->setBrightness(255);
     leds->clear();
     leds->show();
-}
-
-void loopPlayer(DMXPlayer *player) {
-    switch(player->getPlayerDmxType()) {
-        case DmxMode::DMX_1:
-            DMX1Player* p1 = static_cast<DMX1Player *>(player);
-            p1->loopWithDMX();
-            break;
-    }
+    */
 }
 
 void LightTube::loop()
@@ -76,33 +77,6 @@ void LightTube::loop()
     // delayMillis is the amount of time it was delayed (if 0, code is slower then 1/44 of a second and need optimization)
     unsigned long delayMillis = ticker->delayTillNextTick();
 
-
     bool dmxPresent = random(300) == 1;
-    for (int segmentIdx = 0; segmentIdx < segmentCount; segmentIdx++)
-    {
-        if (dmxPresent)
-        {
-            // Else if only for testing
-            if (segmentIdx == 0)
-            {
-                segments[segmentIdx].loopWithDmx(SegmentValue{255, 0, 0, 0}, DimmerCurve::LINEAR);
-            }
-            else if (segmentIdx == 1)
-            {
-                segments[segmentIdx].loopWithDmx(SegmentValue{0, 255, 0, 0}, DimmerCurve::LINEAR);
-            }
-            else if (segmentIdx == 2)
-            {
-                segments[segmentIdx].loopWithDmx(SegmentValue{0, 0, 255, 0}, DimmerCurve::LINEAR);
-            }
-            else
-            {
-                segments[segmentIdx].loopWithDmx(SegmentValue{255, 255, 255, 0}, DimmerCurve::LINEAR);
-            }
-        }
-        else
-        {
-            segments[segmentIdx].loopWithoutDmx(DimmerCurve::LINEAR);
-        }
-    }
+    dmxPlayer.loopWithoutDMX();
 }

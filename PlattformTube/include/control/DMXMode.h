@@ -10,11 +10,15 @@ enum DmxMode
     DMX_64  // 16 Segments X {Dimmer, R, G, B}
 };
 
-struct DMX1
+struct DMXData {
+    virtual ~DMXData() = default;
+};
+
+struct DMX1: public DMXData
 {
     uint8_t dimmer;
 };
-struct DMX4
+struct DMX4: public DMXData
 {
     uint8_t dimmer;
     uint8_t r;
@@ -22,11 +26,11 @@ struct DMX4
     uint8_t b;
 };
 
-struct DMX32
+struct DMX32: public DMXData
 {
     DMX4 segments[8];
 };
-struct DMX64
+struct DMX64: public DMXData
 {
     DMX4 segments[16];
 };
