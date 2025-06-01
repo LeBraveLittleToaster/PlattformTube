@@ -1,0 +1,43 @@
+#include "drivers/ILEDDriver.h"
+#include "control/Segment.h"
+#include "Arduino.h"
+
+Segment::Segment()
+{
+}
+
+Segment::Segment(int totalNumLeds, int startIdx, int endIdx, ILEDDriver *driver)
+    : totalNumLeds(totalNumLeds), startIdx(startIdx), endIdx(endIdx), driver(driver)
+{
+}
+
+void Segment::loopWithDmx(SegmentValue segmentValues, DimmerCurve dimmerCurve)
+{
+    Serial.println("Flashing...");
+    for (int i = startIdx; i <= endIdx; i++)
+    {
+        driver->setPixelRGB(i, segmentValues.r, segmentValues.g, segmentValues.b, segmentValues.white);
+    }
+    driver->setBrightness(255);
+    driver->show();
+}
+
+void Segment::print() {
+    Serial.print("Start Index: ");
+    Serial.print(startIdx);
+    Serial.print(" End Index: ");
+    Serial.println(endIdx);
+    
+}
+
+void Segment::loopWithoutDmx(DimmerCurve dimmerCurve)
+{
+    uint8_t decay = 3;
+    uint8_t brightness = 0;
+    if (driver->getBrightness() > decay)
+    {
+        brightness = driver->getBrightness() - decay;
+    }
+    driver->setBrightness(brightness);
+    driver->show();
+}
