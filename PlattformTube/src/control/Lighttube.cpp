@@ -19,7 +19,7 @@ void LightTube::print()
     Serial.println("LightTube");
 }
 
-DMXPlayer getDMXPlayer(DmxMode dmxMode, int segmentCount, ILEDDriver *driver)
+DMXPlayer* getDMXPlayer(DmxMode dmxMode, int segmentCount, ILEDDriver *driver)
 {
     uint8_t numLeds = driver->getTotalPixelCount();
 
@@ -38,19 +38,20 @@ DMXPlayer getDMXPlayer(DmxMode dmxMode, int segmentCount, ILEDDriver *driver)
     }
     switch(dmxMode) {
         case DmxMode::DMX_1:
-            return DMX1Player(segments, segmentCount, driver);
+            return new DMX1Player(segments, segmentCount, driver);
         case DmxMode::DMX_4:
-            return DMX4Player(segments, segmentCount, driver);
+            return new DMX4Player(segments, segmentCount, driver);
         case DmxMode::DMX_32:
-            return DMX32Player(segments, segmentCount, driver);
+            return new DMX32Player(segments, segmentCount, driver);
         case DmxMode::DMX_64:
-            return DMX64Player(segments, segmentCount, driver);
+            return new DMX64Player(segments, segmentCount, driver);
     }
+    return nullptr;
 }
 
-LightTube::LightTube(IDMXReceiver *dmx, ILEDDriver *driver, Ticker *ticker, uint8_t segmentCount, DmxMode dmxMode)
-{
-    dmxPlayer = getDMXPlayer(dmxMode, segmentCount, driver);
+LightTube::LightTube(IDMXReceiver *dmx, Ticker *ticker, ConfigManager* config, DMXPlayer* dmxPlayer)
+: dmx(dmx), ticker(ticker), config(config), dmxPlayer(dmxPlayer) {
+
 }
 
 LightTube::~LightTube()
@@ -78,5 +79,4 @@ void LightTube::loop()
     unsigned long delayMillis = ticker->delayTillNextTick();
 
     bool dmxPresent = random(300) == 1;
-    dmxPlayer.loopWithoutDMX();
 }

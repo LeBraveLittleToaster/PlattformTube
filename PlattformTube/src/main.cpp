@@ -15,7 +15,7 @@ DMXMAX485 dmxDriver(Serial1, DMX_RX_PIN);
 
 Ticker ticker;
 
-LightTube tube{&dmxDriver, &ledDriver, &ticker, 3, DmxMode::DMX_4};
+LightTube tube{&dmxDriver , &ticker, nullptr, getDMXPlayer(DmxMode::DMX_4, SEGMENTS, &ledDriver)};
 
 
 #include <Arduino.h>

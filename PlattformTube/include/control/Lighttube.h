@@ -7,10 +7,10 @@
 
 #ifndef LIGHTTUBE_H
 #define LIGHTTUBE_H
-
+DMXPlayer* getDMXPlayer(DmxMode dmxMode, int segmentCount, ILEDDriver *driver);
 class LightTube {
 public:
-    LightTube(IDMXReceiver* dmx, ILEDDriver* leds, Ticker* ticker, uint8_t segmentCount, DmxMode dmxMode);
+    LightTube(IDMXReceiver* dmx, Ticker* ticker, ConfigManager* config, DMXPlayer* dmxPlayer);
     void setup();
     void loop();
     void print();
@@ -18,9 +18,9 @@ public:
 
 private:
     IDMXReceiver* dmx;
-    ConfigManager config;
+    ConfigManager* config;
     Ticker* ticker;
     DMXPlayer* dmxPlayer;
 };
 
-#endif // LIGHTTUBE_H
+#endif // LIGHTTUBE_H;

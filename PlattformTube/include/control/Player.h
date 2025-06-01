@@ -5,9 +5,9 @@ class DMXPlayer
 {
 public:
     DMXPlayer(Segment *segments, uint8_t segmentCount, ILEDDriver *leds, DmxMode DmxMode);
-    virtual ~DMXPlayer() {}
-    virtual void loopWithDMX(const DMXData *data);
-    virtual void loopWithoutDMX();
+    virtual ~DMXPlayer();
+    virtual void loopWithDMX(const DMXData *data) = 0;
+    virtual void loopWithoutDMX() = 0;
     DmxMode getPlayerDmxType() { return dmxMode; }
 
 private:
@@ -22,7 +22,7 @@ class DMX1Player : public DMXPlayer
 public:
     DMX1Player(Segment *segments, uint8_t segmentCount, ILEDDriver *leds)
         : DMXPlayer(segments, segmentCount, leds, DmxMode::DMX_1) {}
-    ~DMX1Player();
+    ~DMX1Player(){}
     void loopWithDMX(const DMXData *data) override;
     void loopWithoutDMX() override;
 
@@ -35,7 +35,7 @@ class DMX4Player : public DMXPlayer
 public:
     DMX4Player(Segment *segments, uint8_t segmentCount, ILEDDriver *leds)
         : DMXPlayer(segments, segmentCount, leds, DmxMode::DMX_4) {}
-    ~DMX4Player();
+    ~DMX4Player(){}
     void loopWithDMX(const DMXData *data) override;
     void loopWithoutDMX() override;
 
@@ -48,7 +48,7 @@ class DMX32Player : public DMXPlayer
 public:
     DMX32Player(Segment *segments, uint8_t segmentCount, ILEDDriver *leds)
         : DMXPlayer(segments, segmentCount, leds, DmxMode::DMX_32) {}
-    ~DMX32Player();
+    ~DMX32Player(){}
     void loopWithDMX(const DMXData *data) override;
     void loopWithoutDMX() override;
 
@@ -61,7 +61,7 @@ class DMX64Player : public DMXPlayer
 public:
     DMX64Player(Segment *segments, uint8_t segmentCount, ILEDDriver *leds)
         : DMXPlayer(segments, segmentCount, leds, DmxMode::DMX_64) {}
-    ~DMX64Player();
+    ~DMX64Player(){}
     void loopWithDMX(const DMXData *data) override;
     void loopWithoutDMX() override;
 
