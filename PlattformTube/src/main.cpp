@@ -1,5 +1,5 @@
  #include <Arduino.h>
- #include "control/Lighttube.h"
+ #include "control/LightTube.h"
  #include "config/HardwareConfig.h"
  #include "control/Ticker.h"
 
@@ -17,19 +17,15 @@ Ticker ticker;
 
 LightTube tube{&dmxDriver , &ticker, nullptr, getDMXPlayer(DmxMode::DMX_4, SEGMENTS, &ledDriver)};
 
-
-#include <Arduino.h>
-#include <esp_dmx.h>
-#include <Adafruit_NeoPixel.h>
-
-
 void setup()
 {
   delay(1000);
   Serial.begin(115200);
-
+  delay(1000);
   tube.setup();
 }
+
+
 
 void loop()
 {

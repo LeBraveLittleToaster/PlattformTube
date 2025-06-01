@@ -7,6 +7,7 @@
 
 #ifndef LIGHTTUBE_H
 #define LIGHTTUBE_H
+Segment* getSegments(uint8_t segmentCount, ILEDDriver* driver);
 DMXPlayer* getDMXPlayer(DmxMode dmxMode, int segmentCount, ILEDDriver *driver);
 class LightTube {
 public:

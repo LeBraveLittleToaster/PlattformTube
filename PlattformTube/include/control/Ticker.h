@@ -8,6 +8,7 @@ public:
     void start();
     // Waits until the next tick and returns how long it delayed
     unsigned long delayTillNextTick();
+    unsigned long delayOneSecond();
 
 private:
     unsigned long lastTimestamp = 0;

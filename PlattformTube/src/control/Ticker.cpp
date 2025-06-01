@@ -22,3 +22,9 @@ unsigned long Ticker::delayTillNextTick()
     delay(delayMillis);
     return delayMillis;
 }
+
+unsigned long Ticker::delayOneSecond()
+{
+    delay(1000);
+    return 1000;
+}

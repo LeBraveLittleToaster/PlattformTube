@@ -22,7 +22,7 @@ public:
 private:
     int dataPin;
     int numLeds;
-    Adafruit_NeoPixel* driver;
+    Adafruit_NeoPixel* strip;
 };
 
 #endif // WS2812DRIVER_H
