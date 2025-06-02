@@ -122,12 +122,12 @@ LightTube::~LightTube()
  */
 void LightTube::setup()
 {
+    dmx->begin();
     dmxPlayer->begin();
     ticker->start();
 
     // Placeholder for full init flow
     /*
-    dmx->begin();
     leds->begin();
     config.loadFromEEPROM();
     leds->setBrightness(255);
@@ -153,15 +153,19 @@ void LightTube::loop()
         switch (dmxPlayer->getPlayerDmxType())
         {
         case DmxMode::DMX_1:
+            dmx->readData();
             dmxPlayer->loopWithDMX(dmx->getBuffer(), 0);
             break;
         case DmxMode::DMX_4:
+            dmx->readData();
             dmxPlayer->loopWithDMX(dmx->getBuffer(), 0);
             break;
         case DmxMode::DMX_32:
+            dmx->readData();
             dmxPlayer->loopWithDMX(dmx->getBuffer(), 0);
             break;
         case DmxMode::DMX_64:
+            dmx->readData();
             dmxPlayer->loopWithDMX(dmx->getBuffer(), 0);
             break;
         default:

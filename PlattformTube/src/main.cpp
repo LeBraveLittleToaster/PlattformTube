@@ -10,7 +10,7 @@ WS2812Driver ledDriver(LED_DATA_PIN, NUM_LEDS);
 
 #if defined(DMX_DRIVER_MAX485)
 #include "drivers/DMXMAX485.h"
-DMXMAX485 dmxDriver(Serial1, DMX_RX_PIN);
+DMXMAX485 dmxDriver(DMX_NUM_1, DMX_RX_PIN, DMX_TX_PIN, DMX_EN_PIN);
 #endif
 
 Ticker ticker{23};
