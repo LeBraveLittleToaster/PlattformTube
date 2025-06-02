@@ -9,7 +9,7 @@ public:
     DMXMAX485(HardwareSerial& serial, int rxPin);
     virtual void begin() override;
     virtual bool readData() override;
-    const uint8_t* getBuffer() const;
+    virtual uint8_t* getBuffer() override;
     uint8_t getChannel(int channel) override;
 
     virtual ~DMXMAX485() {}

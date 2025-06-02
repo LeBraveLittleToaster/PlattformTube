@@ -147,37 +147,22 @@ void LightTube::loop()
     // Sync with 44 Hz update rate
     if (ticker->isTickReady())
     {
-        // Test pattern buffer — cycling first byte
-        uint8_t buffer[512];
-        buffer[0] = 100;
-        buffer[1] = 255;
-        buffer[2] = 0;
-        buffer[3] = 0;
-
-        buffer[4] = 5;
-        buffer[5] = 255;
-        buffer[6] = 0;
-        buffer[7] = 0;
-
-        buffer[8] = 255;
-        buffer[9] = 255;
-        buffer[10] = 0;
-        buffer[11] = 0;
+        
 
         // TODO: Refactor with polymorphism instead of switch
         switch (dmxPlayer->getPlayerDmxType())
         {
         case DmxMode::DMX_1:
-            dmxPlayer->loopWithDMX(buffer, 0);
+            dmxPlayer->loopWithDMX(dmx->getBuffer(), 0);
             break;
         case DmxMode::DMX_4:
-            dmxPlayer->loopWithDMX(buffer, 0);
+            dmxPlayer->loopWithDMX(dmx->getBuffer(), 0);
             break;
         case DmxMode::DMX_32:
-            dmxPlayer->loopWithDMX(buffer, 0);
+            dmxPlayer->loopWithDMX(dmx->getBuffer(), 0);
             break;
         case DmxMode::DMX_64:
-            dmxPlayer->loopWithDMX(buffer, 0);
+            dmxPlayer->loopWithDMX(dmx->getBuffer(), 0);
             break;
         default:
             Serial.println("DEFAULTING! CAUTION");

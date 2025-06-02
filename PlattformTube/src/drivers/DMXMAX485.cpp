@@ -38,7 +38,7 @@ bool DMXMAX485::readData() {
   return newData;
 }
 
-const uint8_t* DMXMAX485::getBuffer() const {
+uint8_t* DMXMAX485::getBuffer() {
     return dmxBuffer;
 }
 
