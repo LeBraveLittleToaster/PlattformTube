@@ -130,9 +130,9 @@ void DMX32Player::loopWithDMX(uint8_t buffer[512], uint8_t dmxAddr)
     {
         DMX4 dmx4 = dmx.segments[segIdx];
         // TODO: Proper scaling for LED dimmers
-        uint16_t r = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.r)+ 127) / 255;;
-        uint16_t g = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.g)+ 127) / 255;;
-        uint16_t b = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.b)+ 127) / 255;;
+        uint8_t r = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.r)+ 127) / 255;
+        uint8_t g = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.g)+ 127) / 255;
+        uint8_t b = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.b)+ 127) / 255;
         for (int i = segments[segIdx].startIdx; i <= segments[segIdx].endIdx; i++)
         {
             driver->setPixelRGB(i, r,g,b, 0);
@@ -172,6 +172,19 @@ void DMX64Player::loopWithDMX(uint8_t buffer[512], uint8_t dmxAddr)
     const DMX64 dmx = getDMX64FromDMXBuffer(buffer, dmxAddr);
 
     // TODO: Implement segment-based rendering
+    for (int segIdx = 0; segIdx < segmentCount; segIdx++)
+    {
+        DMX4 dmx4 = dmx.segments[segIdx];
+        // TODO: Proper scaling for LED dimmers
+        uint8_t r = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.r)+ 127) / 255;
+        uint8_t g = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.g)+ 127) / 255;
+        uint8_t b = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.b)+ 127) / 255;
+        for (int i = segments[segIdx].startIdx; i <= segments[segIdx].endIdx; i++)
+        {
+            driver->setPixelRGB(i, r,g,b, 0);
+        }
+    }
+    driver->show();
 }
 
 /**

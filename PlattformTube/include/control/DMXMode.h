@@ -19,13 +19,16 @@ enum DmxMode
     DMX_64  // 16 Segments X {Dimmer, R, G, B}
 };
 
+uint8_t getSegmentCount (DmxMode tv);
+
 /**
  * @struct DMXData
  * @brief Base struct for DMX data types, allowing polymorphic handling.
- * 
+ *
  * Contains a virtual destructor to enable safe inheritance.
  */
-struct DMXData {
+struct DMXData
+{
     virtual ~DMXData() = default;
 };
 
@@ -33,7 +36,7 @@ struct DMXData {
  * @struct DMX1
  * @brief DMX data for single channel dimmer (white light).
  */
-struct DMX1: public DMXData
+struct DMX1 : public DMXData
 {
     DMX1() : dimmer(0) {}
     explicit DMX1(uint8_t d) : dimmer(d) {}
@@ -45,7 +48,7 @@ struct DMX1: public DMXData
  * @struct DMX4
  * @brief DMX data for 4-channel RGB lighting (dimmer + R, G, B).
  */
-struct DMX4: public DMXData
+struct DMX4 : public DMXData
 {
     DMX4() : dimmer(0), r(0), g(0), b(0) {}
     DMX4(uint8_t d, uint8_t red, uint8_t green, uint8_t blue)
@@ -60,10 +63,10 @@ struct DMX4: public DMXData
 /**
  * @struct DMX32
  * @brief DMX data for 8 segments, each with 4 channels (dimmer + RGB).
- * 
+ *
  * Represents a strip or fixture split into 8 controllable sections.
  */
-struct DMX32: public DMXData
+struct DMX32 : public DMXData
 {
     DMX32() = default;
 
@@ -71,7 +74,8 @@ struct DMX32: public DMXData
      * @brief Construct from an array of 8 DMX4 segments.
      * @param segs Array of 8 DMX4 segments.
      */
-    DMX32(const DMX4 (&segs)[8]) {
+    DMX32(const DMX4 (&segs)[8])
+    {
         for (int i = 0; i < 8; ++i)
             segments[i] = segs[i];
     }
@@ -82,10 +86,10 @@ struct DMX32: public DMXData
 /**
  * @struct DMX64
  * @brief DMX data for 16 segments, each with 4 channels (dimmer + RGB).
- * 
+ *
  * Represents a strip or fixture split into 16 controllable sections.
  */
-struct DMX64: public DMXData
+struct DMX64 : public DMXData
 {
     DMX64() = default;
 
@@ -93,7 +97,8 @@ struct DMX64: public DMXData
      * @brief Construct from an array of 16 DMX4 segments.
      * @param segs Array of 16 DMX4 segments.
      */
-    DMX64(const DMX4 (&segs)[16]) {
+    DMX64(const DMX4 (&segs)[16])
+    {
         for (int i = 0; i < 16; ++i)
             segments[i] = segs[i];
     }

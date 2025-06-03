@@ -38,8 +38,10 @@ Segment *getSegments(uint8_t segmentCount, ILEDDriver *driver)
  * @param driver LED driver instance.
  * @return DMXPlayer* Pointer to the created DMX player instance.
  */
-DMXPlayer *getDMXPlayer(DmxMode dmxMode, int segmentCount, ILEDDriver *driver)
+DMXPlayer *getDMXPlayer(DmxMode dmxMode, ILEDDriver *driver)
 {
+    //TODO: check if enough LED for segments are available
+    uint8_t segmentCount = getSegmentCount(dmxMode);
     Segment *segments = getSegments(segmentCount, driver);
     switch (dmxMode)
     {
@@ -114,7 +116,7 @@ LightTube::LightTube(IDMXReceiver *dmx, Ticker *ticker, ConfigManager *config, D
 LightTube::~LightTube()
 {
     // TODO proper destructor
-    // delete dmxPlayer;
+    //delete dmxPlayer;
 }
 
 /**
@@ -122,6 +124,7 @@ LightTube::~LightTube()
  */
 void LightTube::setup()
 {
+    config->loadFromEEPROM(); 
     dmx->begin();
     dmxPlayer->begin();
     ticker->start();
@@ -154,19 +157,19 @@ void LightTube::loop()
         {
         case DmxMode::DMX_1:
             dmx->readData();
-            dmxPlayer->loopWithDMX(dmx->getBuffer(), 0);
+            dmxPlayer->loopWithDMX(dmx->getBuffer(), config->getAddress());
             break;
         case DmxMode::DMX_4:
             dmx->readData();
-            dmxPlayer->loopWithDMX(dmx->getBuffer(), 0);
+            dmxPlayer->loopWithDMX(dmx->getBuffer(), config->getAddress());
             break;
         case DmxMode::DMX_32:
             dmx->readData();
-            dmxPlayer->loopWithDMX(dmx->getBuffer(), 0);
+            dmxPlayer->loopWithDMX(dmx->getBuffer(), config->getAddress());
             break;
         case DmxMode::DMX_64:
             dmx->readData();
-            dmxPlayer->loopWithDMX(dmx->getBuffer(), 0);
+            dmxPlayer->loopWithDMX(dmx->getBuffer(), config->getAddress());
             break;
         default:
             Serial.println("DEFAULTING! CAUTION");

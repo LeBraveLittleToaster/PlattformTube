@@ -28,6 +28,6 @@ void ConfigManager::saveToEEPROM() {
  * 
  * @return int The DMX address.
  */
-int ConfigManager::getAddress() {
+uint8_t ConfigManager::getAddress() {
   return dmxAddress;
 }

@@ -29,7 +29,7 @@ Segment* getSegments(uint8_t segmentCount, ILEDDriver* driver);
  * 
  * Note: Caller is responsible for managing the lifetime of the returned DMXPlayer.
  */
-DMXPlayer* getDMXPlayer(DmxMode dmxMode, int segmentCount, ILEDDriver *driver);
+DMXPlayer* getDMXPlayer(DmxMode dmxMode, ILEDDriver *driver);
 
 /**
  * @class LightTube

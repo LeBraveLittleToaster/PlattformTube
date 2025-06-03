@@ -18,7 +18,7 @@ public:
      * @param leds Pointer to LED driver interface.
      * @param dmxMode DMX mode this player supports.
      */
-    DMXPlayer(Segment *segments, uint8_t segmentCount, ILEDDriver *leds, DmxMode dmxMode);
+    DMXPlayer(Segment *segments, uint8_t segmentCount,ILEDDriver *leds, DmxMode dmxMode);
 
     /**
      * @brief Virtual destructor for safe polymorphic use.

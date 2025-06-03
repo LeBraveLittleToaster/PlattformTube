@@ -1,5 +1,22 @@
 #include "control/DMXMode.h"
 
+uint8_t getSegmentCount (DmxMode tv)
+{
+    switch (tv)
+    {
+    case DmxMode::DMX_1:
+        return 1;
+    case DmxMode::DMX_4:
+        return 1;
+    case DmxMode::DMX_32:
+        return 8;
+    case DmxMode::DMX_64:
+        return 16;
+    default:
+        return 0;
+    }
+}
+
 /**
  * @brief Extracts a single DMX channel value from the buffer.
  * 

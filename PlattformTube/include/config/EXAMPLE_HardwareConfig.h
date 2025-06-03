@@ -4,7 +4,6 @@
 #define LED_DATA_PIN 7
 
 #define NUM_LEDS 144
-#define SEGMENTS 3
 
 #define DMX_RX_PIN 3
 #define DMX_TX_PIN 20

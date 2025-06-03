@@ -2,6 +2,7 @@
  #include "control/LightTube.h"
  #include "config/HardwareConfig.h"
  #include "control/Ticker.h"
+ #include "control/ConfigManager.h"
 
 #if defined(LED_DRIVER_WS2812)
 #include "drivers/WS2812Driver.h"
@@ -14,8 +15,9 @@ DMXMAX485 dmxDriver(DMX_NUM_1, DMX_RX_PIN, DMX_TX_PIN, DMX_EN_PIN);
 #endif
 
 Ticker ticker{23};
+ConfigManager conf;
 
-LightTube tube{&dmxDriver , &ticker, nullptr, getDMXPlayer(DmxMode::DMX_32, SEGMENTS, &ledDriver)};
+LightTube tube{&dmxDriver , &ticker, &conf, getDMXPlayer(DmxMode::DMX_32, &ledDriver)};
 
 void setup()
 {
