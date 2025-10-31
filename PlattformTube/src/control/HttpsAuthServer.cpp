@@ -104,7 +104,7 @@ void HttpsAuthServer::loop() {
   if (s_server && s_started) {
     s_server->loop();
   }
-  delay(1);
+  //delay(.01);
 }
 
 /* ===================== Middleware ===================== */

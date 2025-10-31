@@ -152,14 +152,35 @@ Artnet artnet;
 
 HttpsAuthServer httpsServer;
 
+TaskHandle_t dmxTaskHandle = nullptr;
+TaskHandle_t webTaskHandle = nullptr;
+
+// ----------------- Tasks -----------------
+void DmxTask(void* arg) {
+  for(;;) artnet.loop();
+}
+
+void WebTask(void* arg) {
+  for(;;) httpsServer.loop();
+}
+
+
 void setup() {
   artnet.setup(onDmxFrame);
   httpsServer.begin(WLAN_SSID, WLAN_PASSWORD);
+
+  const UBaseType_t DMX_PRIO = 12;     // high
+  const UBaseType_t WEB_PRIO = 4;      // low
+
+  xTaskCreatePinnedToCore(DmxTask, "DMX", 4096, nullptr, DMX_PRIO, &dmxTaskHandle, 0); // Core 0
+  xTaskCreatePinnedToCore(WebTask, "WEB", 4096, nullptr, WEB_PRIO, &webTaskHandle, 1); // Core 1
 }
 
 void loop() {
-  artnet.loop();
-  httpsServer.loop();
+
+  //artnet.loop();
+  //httpsServer.loop();
+  //vTaskDelay(1000);
 }
 
 
