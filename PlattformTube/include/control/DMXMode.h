@@ -13,10 +13,10 @@
  */
 enum DmxMode
 {
-    DMX_1,  // Dimmer Only, White
-    DMX_4,  // Dimmer, R, G, B
-    DMX_32, // 8 Segments X {Dimmer, R, G, B}
-    DMX_64  // 16 Segments X {Dimmer, R, G, B}
+    DMX_1,  // INDEX=0 | Dimmer Only, White
+    DMX_4,  // INDEX=1 | Dimmer, R, G, B
+    DMX_32, // INDEX=2 | 8 Segments X {Dimmer, R, G, B}
+    DMX_64  // INDEX=3 | 16 Segments X {Dimmer, R, G, B}
 };
 
 uint8_t getSegmentCount (DmxMode tv);
@@ -112,7 +112,7 @@ struct DMX64 : public DMXData
  * @param dmxAdr Starting DMX address (1-based).
  * @return DMX1 struct with extracted dimmer value.
  */
-DMX1 getDMX1FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr);
+DMX1 getDMX1FromDMXBuffer(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAdr);
 
 /**
  * @brief Extracts DMX4 data (dimmer + RGB) from a raw DMX buffer.
@@ -120,7 +120,7 @@ DMX1 getDMX1FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr);
  * @param dmxAdr Starting DMX address (1-based).
  * @return DMX4 struct with extracted dimmer and RGB values.
  */
-DMX4 getDMX4FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr);
+DMX4 getDMX4FromDMXBuffer(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAdr);
 
 /**
  * @brief Extracts DMX32 data (8 segments of DMX4) from a raw DMX buffer.
@@ -128,7 +128,7 @@ DMX4 getDMX4FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr);
  * @param dmxAdr Starting DMX address (1-based).
  * @return DMX32 struct with extracted segment data.
  */
-DMX32 getDMX32FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr);
+DMX32 getDMX32FromDMXBuffer(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAdr);
 
 /**
  * @brief Extracts DMX64 data (16 segments of DMX4) from a raw DMX buffer.
@@ -136,4 +136,4 @@ DMX32 getDMX32FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr);
  * @param dmxAdr Starting DMX address (1-based).
  * @return DMX64 struct with extracted segment data.
  */
-DMX64 getDMX64FromDMXBuffer(uint8_t buffer[512], uint8_t dmxAdr);
+DMX64 getDMX64FromDMXBuffer(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAdr);

@@ -1,6 +1,7 @@
 #include "control/Segment.h"
 #include "DMXMode.h"
 
+#pragma once
 /**
  * @class DMXPlayer
  * @brief Abstract base class for DMX players controlling LED segments.
@@ -29,7 +30,7 @@ public:
      * @brief Main update loop when DMX data is present.
      * @param data Pointer to DMXData containing the latest DMX values.
      */
-    virtual void loopWithDMX(uint8_t buffer[512], uint8_t dmxAddr) = 0;
+    virtual void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) = 0;
 
     /**
      * @brief Update loop for when no DMX data is available.
@@ -67,7 +68,7 @@ public:
     ~DMX1Player() override {}
 
     void begin() override;
-    void loopWithDMX(uint8_t buffer[512], uint8_t dmxAddr) override;
+    void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:
@@ -86,7 +87,7 @@ public:
     ~DMX4Player() override {}
 
     void begin() override;
-    void loopWithDMX(uint8_t buffer[512], uint8_t dmxAddr) override;
+    void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:
@@ -105,7 +106,7 @@ public:
     ~DMX32Player() override {}
 
     void begin() override;
-    void loopWithDMX(uint8_t buffer[512], uint8_t dmxAddr) override;
+    void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:
@@ -124,9 +125,10 @@ public:
     ~DMX64Player() override {}
 
     void begin() override;
-    void loopWithDMX(uint8_t buffer[512], uint8_t dmxAddr) override;
+    void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:
     DMX64 data; ///< Storage for current DMX64 data.
 };
+

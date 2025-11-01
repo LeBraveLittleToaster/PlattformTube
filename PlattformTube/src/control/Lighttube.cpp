@@ -1,6 +1,10 @@
-#include "control/LightTube.h"
+#include "control/Segment.h"
+#include "control/Player.h"
 #include "config/HardwareConfig.h"
 #include "control/DMXMode.h"
+#include "control/LightTube.h"
+#include "drivers/DMXMAX485.h"
+#include "drivers/Artnet.h"
 
 /**
  * @brief Creates LED segments based on the total number of pixels and segment count.
@@ -40,7 +44,7 @@ Segment *getSegments(uint8_t segmentCount, ILEDDriver *driver)
  */
 DMXPlayer *getDMXPlayer(DmxMode dmxMode, ILEDDriver *driver)
 {
-    //TODO: check if enough LED for segments are available
+    // TODO: check if enough LED for segments are available
     uint8_t segmentCount = getSegmentCount(dmxMode);
     Segment *segments = getSegments(segmentCount, driver);
     switch (dmxMode)
@@ -116,7 +120,7 @@ LightTube::LightTube(IDMXReceiver *dmx, Ticker *ticker, ConfigManager *config, D
 LightTube::~LightTube()
 {
     // TODO proper destructor
-    //delete dmxPlayer;
+    // delete dmxPlayer;
 }
 
 /**
@@ -124,19 +128,16 @@ LightTube::~LightTube()
  */
 void LightTube::setup()
 {
-    config->loadFromEEPROM(); 
+    Serial.println("Setup LightTube");
+    //Serial.println("Loading config from EEPROM");
+    //config->loadFromEEPROM();
+    config->printConfig();
+    Serial.println("Starting DMX");
     dmx->begin();
+    Serial.println("Starting DMX Player");
     dmxPlayer->begin();
+    Serial.println("Starting Ticker");
     ticker->start();
-
-    // Placeholder for full init flow
-    /*
-    leds->begin();
-    config.loadFromEEPROM();
-    leds->setBrightness(255);
-    leds->clear();
-    leds->show();
-    */
 }
 
 /**
@@ -147,32 +148,18 @@ void LightTube::setup()
  */
 void LightTube::loop()
 {
+    dmx->loop();
+
     // Sync with 44 Hz update rate
     if (ticker->isTickReady())
     {
-        
-
-        // TODO: Refactor with polymorphism instead of switch
-        switch (dmxPlayer->getPlayerDmxType())
-        {
-        case DmxMode::DMX_1:
-            dmx->readData();
-            dmxPlayer->loopWithDMX(dmx->getBuffer(), config->getAddress());
-            break;
-        case DmxMode::DMX_4:
-            dmx->readData();
-            dmxPlayer->loopWithDMX(dmx->getBuffer(), config->getAddress());
-            break;
-        case DmxMode::DMX_32:
-            dmx->readData();
-            dmxPlayer->loopWithDMX(dmx->getBuffer(), config->getAddress());
-            break;
-        case DmxMode::DMX_64:
-            dmx->readData();
-            dmxPlayer->loopWithDMX(dmx->getBuffer(), config->getAddress());
-            break;
-        default:
-            Serial.println("DEFAULTING! CAUTION");
-        };
+        dmx->readData();
+        //TODO: Varying buffer size
+        dmxPlayer->loopWithDMX(dmx->getBuffer(), dmx->getBufferSize(), config->getDmxAddress());
+    }
+    else
+    {
+        //TODO: need to handle what happens if no dmx signal was send over long time (3-4 ticks)
+        dmxPlayer->loopWithoutDMX();
     }
 }

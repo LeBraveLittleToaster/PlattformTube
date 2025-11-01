@@ -20,6 +20,10 @@ void DMXMAX485::begin() {
     dmx_set_pin(dmxPort, txPin, rxPin, enPin);
   }
 
+int DMXMAX485::getBufferSize(){
+    return 512;
+}
+
 bool DMXMAX485::readData() {
     dmx_packet_t packet;
     if (dmx_receive(dmxPort, &packet, DMX_TIMEOUT_TICK)) {
@@ -46,6 +50,10 @@ uint8_t DMXMAX485::getChannel(int channel) {
         return dmxBuffer[channel];
     }
     return 0;
+}
+
+void DMXMAX485::loop(){
+    // No implementation needed for now
 }
 
 DMXMAX485::~DMXMAX485() {

@@ -1,12 +1,14 @@
-#include "IDMXReceiver.h"
+#ifndef LIGHTTUBE_H
+#define LIGHTTUBE_H
+
+#include "drivers/IDMXReceiver.h"
 #include "drivers/ILEDDriver.h"
 #include "ConfigManager.h"
 #include "control/Ticker.h"
 #include "control/Player.h"
 #include "Segment.h"
 
-#ifndef LIGHTTUBE_H
-#define LIGHTTUBE_H
+IDMXReceiver* getDmxReceiver(ConfigManager* config);
 
 /**
  * @brief Factory function to create an array of Segment pointers.

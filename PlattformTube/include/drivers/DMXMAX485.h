@@ -1,8 +1,10 @@
 #ifndef DMXMAX485_H
 #define DMXMAX485_H
 
-#include "control/IDMXReceiver.h"
 #include <esp_dmx.h>
+
+#include "drivers/IDMXReceiver.h"
+
 
 class DMXMAX485 : public IDMXReceiver {
 public:
@@ -15,7 +17,9 @@ public:
 
     virtual void begin() override;
     virtual bool readData() override;
+    virtual void loop() override;
     uint8_t* getBuffer() override;
+    int getBufferSize() override;
     uint8_t getChannel(int channel) override;
     virtual ~DMXMAX485();
 
