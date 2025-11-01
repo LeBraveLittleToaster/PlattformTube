@@ -17,4 +17,6 @@
 #define WLAN_SSID "adminadmin"
 #define WLAN_PASSWORD "adminadmin"
 
+#define SECURE_KEY "12345"
+
 #endif // HARDWARECONFIG_H

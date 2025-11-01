@@ -12,8 +12,11 @@
 SSLCert*       HttpsAuthServer::s_cert    = nullptr;
 HTTPSServer*   HttpsAuthServer::s_server  = nullptr;
 bool           HttpsAuthServer::s_started = false;
+ConfigManager* HttpsAuthServer::s_configManager = nullptr;
 
-HttpsAuthServer::HttpsAuthServer() {}
+HttpsAuthServer::HttpsAuthServer(ConfigManager* configManager) {
+  s_configManager = configManager;
+}
 HttpsAuthServer::~HttpsAuthServer() {
   if (s_server && s_started) {
     s_server->stop();
@@ -229,7 +232,13 @@ void HttpsAuthServer::handlePublicPage(HTTPRequest * req, HTTPResponse * res) {
   res->println(" seconds.</p>");
   res->println("<p><a href=\"/\">Go back</a></p>");
   res->println("</body>");
-  res->println("</html>");
+  res->println("</html>");  
+  if(s_configManager->getDmxAddress() == 5){
+    s_configManager->setDmxAddress(0);  
+  }else{
+    s_configManager->setDmxAddress(5);
+  }
+  s_configManager->printConfig();
 }
 
 void HttpsAuthServer::handleRoot(HTTPRequest * req, HTTPResponse * res) {

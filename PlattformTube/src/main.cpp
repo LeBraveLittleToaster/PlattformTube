@@ -15,14 +15,14 @@ WS2812Driver ledDriver(LED_DATA_PIN, NUM_LEDS);
 #endif
 
 Ticker ticker{TICKER_INTERVAL_MILLIS};
-ConfigManager config{0, 0, DMXReceivers::ARTNET, DmxMode::DMX_64};
+ConfigManager config{0, 0, DMXReceivers::ARTNET, DmxMode::DMX_32};
 
 DMXMAX485 dmx(1, DMX_RX_PIN, DMX_TX_PIN, DMX_EN_PIN);
 Artnet artnet(&config);
 
 LightTube tube{&artnet, &ticker, &config, getDMXPlayer(config.getDmxMode(), &ledDriver)};
 
-HttpsAuthServer httpsServer;
+HttpsAuthServer httpsServer(&config);
 
 
 
@@ -54,8 +54,8 @@ void setup()
 
   httpsServer.begin(WLAN_SSID, WLAN_PASSWORD);
 
-  const UBaseType_t DMX_PRIO = 12; // high
-  const UBaseType_t WEB_PRIO = 4;  // low
+  const UBaseType_t DMX_PRIO = 12;
+  const UBaseType_t WEB_PRIO = 4;
 
   xTaskCreatePinnedToCore(DmxTask, "DMX", 4096, nullptr, DMX_PRIO, &dmxTaskHandle, 0); // Core 0
   xTaskCreatePinnedToCore(WebTask, "WEB", 4096, nullptr, WEB_PRIO, &webTaskHandle, 1); // Core 1

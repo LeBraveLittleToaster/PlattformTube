@@ -18,11 +18,13 @@
 #include <HTTPRequest.hpp>
 #include <HTTPResponse.hpp>
 
+#include "control/ConfigManager.h"
+
 using namespace httpsserver;
 
 class HttpsAuthServer {
 public:
-  HttpsAuthServer();
+  HttpsAuthServer(ConfigManager* configManager);
   ~HttpsAuthServer();
 
   void begin(const char* ssid, const char* password);
@@ -48,6 +50,7 @@ private:
   static SSLCert*       s_cert;
   static HTTPSServer*   s_server;
   static bool           s_started;
+  static ConfigManager* s_configManager;
 
   // Setup helpers
   static void setupRoutes();
