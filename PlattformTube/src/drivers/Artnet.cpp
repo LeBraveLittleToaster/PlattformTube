@@ -13,6 +13,11 @@ Artnet::Artnet(ConfigManager *config)
   this->config = config;
 }
 
+Artnet::~Artnet() {
+  self_ = nullptr;
+  artnet.stop();
+}
+
 boolean Artnet::ConnectWifi(void)
 {
   boolean state = true;

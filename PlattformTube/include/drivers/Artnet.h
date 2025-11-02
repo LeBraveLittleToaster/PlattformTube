@@ -9,6 +9,7 @@ class Artnet : public IDMXReceiver
 {
 public:
     Artnet(ConfigManager* config);
+    ~Artnet() override;
     virtual void loop() override;
     virtual void begin() override;
     virtual uint8_t getChannel(int channel) override;

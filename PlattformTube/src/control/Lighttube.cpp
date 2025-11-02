@@ -1,5 +1,4 @@
 #include "control/Segment.h"
-#include "control/Player.h"
 #include "config/HardwareConfig.h"
 #include "control/DMXMode.h"
 #include "control/LightTube.h"
@@ -110,6 +109,7 @@ void LightTube::print()
 LightTube::LightTube(IDMXReceiver *dmx, Ticker *ticker, ConfigManager *config, DMXPlayer *dmxPlayer)
     : dmx(dmx), ticker(ticker), config(config), dmxPlayer(dmxPlayer)
 {
+    mutex = xSemaphoreCreateMutex();
 }
 
 /**
@@ -120,7 +120,7 @@ LightTube::LightTube(IDMXReceiver *dmx, Ticker *ticker, ConfigManager *config, D
 LightTube::~LightTube()
 {
     // TODO proper destructor
-    // delete dmxPlayer;
+    delete dmxPlayer;
 }
 
 /**
@@ -129,8 +129,8 @@ LightTube::~LightTube()
 void LightTube::setup()
 {
     Serial.println("Setup LightTube");
-    //Serial.println("Loading config from EEPROM");
-    //config->loadFromEEPROM();
+    // Serial.println("Loading config from EEPROM");
+    // config->loadFromEEPROM();
     config->printConfig();
     Serial.println("Starting DMX");
     dmx->begin();
@@ -138,6 +138,60 @@ void LightTube::setup()
     dmxPlayer->begin();
     Serial.println("Starting Ticker");
     ticker->start();
+}
+
+boolean LightTube::deleteDmxPlayer()
+{
+    if(this->dmxPlayer == nullptr)
+    {
+        return true;
+    }
+    xSemaphoreTake(mutex, portMAX_DELAY);
+    delete this->dmxPlayer;
+    this->dmxPlayer = nullptr;
+    xSemaphoreGive(mutex);
+    return true;
+}
+
+boolean LightTube::deleteDmxReceiver()
+{
+    Serial.print("Is dmx null? = ");
+    Serial.println(this->dmx == nullptr ? "true" : "false");
+    if(this->dmx == nullptr)
+    {
+        Serial.println("DMX Receiver is already null");
+        return false;
+    }
+    xSemaphoreTake(mutex, portMAX_DELAY);
+    Serial.println("Deleting DMX Receiver");
+    delete this->dmx;
+    this->dmx = nullptr;
+    Serial.println("DMX Receiver deleted");
+    xSemaphoreGive(mutex);
+    return true;
+}
+boolean LightTube::setDmxPlayer(DMXPlayer *player)
+{
+    xSemaphoreTake(mutex, portMAX_DELAY);
+    if (this->dmxPlayer != nullptr)
+    {
+        return false;
+    }
+    this->dmxPlayer = player;
+    xSemaphoreGive(mutex);
+    return true;
+}
+
+boolean LightTube::setDmxReceiver(IDMXReceiver *receiver)
+{
+    xSemaphoreTake(mutex, portMAX_DELAY);
+    if (this->dmx != nullptr)
+    {
+        return false;
+    }
+    this->dmx = receiver;
+    xSemaphoreGive(mutex);
+    return true;
 }
 
 /**
@@ -154,12 +208,12 @@ void LightTube::loop()
     if (ticker->isTickReady())
     {
         dmx->readData();
-        //TODO: Varying buffer size
+        // TODO: Varying buffer size
         dmxPlayer->loopWithDMX(dmx->getBuffer(), dmx->getBufferSize(), config->getDmxAddress());
     }
     else
     {
-        //TODO: need to handle what happens if no dmx signal was send over long time (3-4 ticks)
+        // TODO: need to handle what happens if no dmx signal was send over long time (3-4 ticks)
         dmxPlayer->loopWithoutDMX();
     }
 }

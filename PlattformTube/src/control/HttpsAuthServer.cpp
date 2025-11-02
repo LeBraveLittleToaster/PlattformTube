@@ -7,58 +7,68 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-
 // Static storage
-SSLCert*       HttpsAuthServer::s_cert    = nullptr;
-HTTPSServer*   HttpsAuthServer::s_server  = nullptr;
-bool           HttpsAuthServer::s_started = false;
-ConfigManager* HttpsAuthServer::s_configManager = nullptr;
+SSLCert *HttpsAuthServer::s_cert = nullptr;
+HTTPSServer *HttpsAuthServer::s_server = nullptr;
+bool HttpsAuthServer::s_started = false;
+ConfigManager *HttpsAuthServer::s_configManager = nullptr;
 
-HttpsAuthServer::HttpsAuthServer(ConfigManager* configManager) {
+HttpsAuthServer::HttpsAuthServer(ConfigManager *configManager)
+{
   s_configManager = configManager;
 }
-HttpsAuthServer::~HttpsAuthServer() {
-  if (s_server && s_started) {
+HttpsAuthServer::~HttpsAuthServer()
+{
+  if (s_server && s_started)
+  {
     s_server->stop();
     s_started = false;
   }
 }
 
-void HttpsAuthServer::begin(const char* ssid, const char* password) {
+void HttpsAuthServer::begin(const char *ssid, const char *password)
+{
   Serial.begin(115200);
   delay(50);
 
   // WiFi up (if not already)
-  if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED)
+  {
     Serial.println("[HTTPS] Connecting WiFi...");
     WiFi.begin(ssid, password);
     uint32_t t0 = millis();
-    while (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED)
+    {
       Serial.print(".");
       delay(500);
-      if (millis() - t0 > 30000) { // 30s hard timeout
+      if (millis() - t0 > 30000)
+      { // 30s hard timeout
         Serial.println("\n[HTTPS] WiFi connect failed. Check credentials or signal.");
         break;
       }
     }
-    if (WiFi.status() == WL_CONNECTED) {
+    if (WiFi.status() == WL_CONNECTED)
+    {
       Serial.print("\n[HTTPS] WiFi OK, IP=");
       Serial.println(WiFi.localIP());
     }
-  } else {
+  }
+  else
+  {
     Serial.print("[HTTPS] WiFi already connected, IP=");
     Serial.println(WiFi.localIP());
   }
 
-  if (!s_cert) {
+  if (!s_cert)
+  {
     s_cert = new SSLCert(
-      example_crt_DER, example_crt_DER_len,
-      example_key_DER, example_key_DER_PRIVATE_len
-    );
+        example_crt_DER, example_crt_DER_len,
+        example_key_DER, example_key_DER_PRIVATE_len);
   }
 
   // Create server
-  if (!s_server) {
+  if (!s_server)
+  {
     s_server = new HTTPSServer(s_cert);
   }
 
@@ -67,13 +77,14 @@ void HttpsAuthServer::begin(const char* ssid, const char* password) {
   startServer();
 }
 
-void HttpsAuthServer::setupRoutes() {
+void HttpsAuthServer::setupRoutes()
+{
   // Resource nodes
-  ResourceNode * nodeRoot     = new ResourceNode("/",             "GET", &handleRoot);
-  ResourceNode * nodeInternal = new ResourceNode("/internal",     "GET", &handleInternalPage);
-  ResourceNode * nodeAdmin    = new ResourceNode("/internal/admin","GET", &handleAdminPage);
-  ResourceNode * nodePublic   = new ResourceNode("/public",       "GET", &handlePublicPage);
-  ResourceNode * node404      = new ResourceNode("",              "GET", &handle404);
+  ResourceNode *nodeRoot = new ResourceNode("/", "GET", &handleRoot);
+  ResourceNode *nodeInternal = new ResourceNode("/internal", "GET", &handleInternalPage);
+  ResourceNode *nodeAdmin = new ResourceNode("/internal/admin", "GET", &handleAdminPage);
+  ResourceNode *nodePublic = new ResourceNode("/public", "GET", &handlePublicPage);
+  ResourceNode *node404 = new ResourceNode("", "GET", &handle404);
 
   s_server->registerNode(nodeRoot);
   s_server->registerNode(nodeInternal);
@@ -83,36 +94,45 @@ void HttpsAuthServer::setupRoutes() {
   s_server->setDefaultNode(node404);
 }
 
-void HttpsAuthServer::setupMiddleware() {
+void HttpsAuthServer::setupMiddleware()
+{
   // Order matters: auth before authorization.
   s_server->addMiddleware(&middlewareAuthentication);
   s_server->addMiddleware(&middlewareAuthorization);
 }
 
-void HttpsAuthServer::startServer() {
-  if (s_started) return;
+void HttpsAuthServer::startServer()
+{
+  if (s_started)
+    return;
 
   Serial.println("[HTTPS] Starting server...");
   s_server->start();
   s_started = s_server->isRunning();
 
-  if (s_started) {
+  if (s_started)
+  {
     Serial.println("[HTTPS] Server ready.");
-  } else {
+  }
+  else
+  {
     Serial.println("[HTTPS] Server failed to start. Check cert/key and heap.");
   }
 }
 
-void HttpsAuthServer::loop() {
-  if (s_server && s_started) {
+void HttpsAuthServer::loop()
+{
+  if (s_server && s_started)
+  {
     s_server->loop();
   }
-  //delay(.01);
+  // delay(.01);
 }
 
 /* ===================== Middleware ===================== */
 
-void HttpsAuthServer::middlewareAuthentication(HTTPRequest * req, HTTPResponse * res, std::function<void()> next) {
+void HttpsAuthServer::middlewareAuthentication(HTTPRequest *req, HTTPResponse *res, std::function<void()> next)
+{
   // Nuke any client-provided internal headers — no auth bypasses on our watch.
   req->setHeader(HEADER_USERNAME, "");
   req->setHeader(HEADER_GROUP, "");
@@ -121,24 +141,33 @@ void HttpsAuthServer::middlewareAuthentication(HTTPRequest * req, HTTPResponse *
   std::string reqUsername = req->getBasicAuthUser();
   std::string reqPassword = req->getBasicAuthPassword();
 
-  if (reqUsername.length() > 0 && reqPassword.length() > 0) {
+  if (reqUsername.length() > 0 && reqPassword.length() > 0)
+  {
     bool authValid = true;
     std::string group = "";
 
     // Yes, hardcoded. This is a demo. Replace with real user storage if you care about security.
-    if (reqUsername == "admin" && reqPassword == "secret") {
+    if (reqUsername == "admin" && reqPassword == "secret")
+    {
       group = "ADMIN";
-    } else if (reqUsername == "user" && reqPassword == "test") {
+    }
+    else if (reqUsername == "user" && reqPassword == "test")
+    {
       group = "USER";
-    } else {
+    }
+    else
+    {
       authValid = false;
     }
 
-    if (authValid) {
+    if (authValid)
+    {
       req->setHeader(HEADER_USERNAME, reqUsername);
-      req->setHeader(HEADER_GROUP,    group);
+      req->setHeader(HEADER_GROUP, group);
       next();
-    } else {
+    }
+    else
+    {
       res->setStatusCode(401);
       res->setStatusText("Unauthorized");
       res->setHeader("Content-Type", "text/plain");
@@ -146,30 +175,37 @@ void HttpsAuthServer::middlewareAuthentication(HTTPRequest * req, HTTPResponse *
       res->println("401. Unauthorized (try admin/secret or user/test)");
       // Do NOT call next()
     }
-  } else {
+  }
+  else
+  {
     // No attempt — pass through
     next();
   }
 }
 
-void HttpsAuthServer::middlewareAuthorization(HTTPRequest * req, HTTPResponse * res, std::function<void()> next) {
+void HttpsAuthServer::middlewareAuthorization(HTTPRequest *req, HTTPResponse *res, std::function<void()> next)
+{
   std::string username = req->getHeader(HEADER_USERNAME);
 
   // Block /internal... when not logged in
-  if (username == "" && req->getRequestString().substr(0, 9) == "/internal") {
+  if (username == "" && req->getRequestString().substr(0, 9) == "/internal")
+  {
     res->setStatusCode(401);
     res->setStatusText("Unauthorized");
     res->setHeader("Content-Type", "text/plain");
     res->setHeader("WWW-Authenticate", "Basic realm=\"ESP32 privileged area\"");
     res->println("401. Unauthorized (try admin/secret or user/test)");
-  } else {
+  }
+  else
+  {
     next();
   }
 }
 
 /* ===================== Handlers ===================== */
 
-void HttpsAuthServer::handleInternalPage(HTTPRequest * req, HTTPResponse * res) {
+void HttpsAuthServer::handleInternalPage(HTTPRequest *req, HTTPResponse *res)
+{
   res->setStatusCode(200);
   res->setStatusText("OK");
   res->setHeader("Content-Type", "text/html; charset=utf8");
@@ -183,7 +219,8 @@ void HttpsAuthServer::handleInternalPage(HTTPRequest * req, HTTPResponse * res) 
 
   res->println("<p>Welcome to the internal area. Congratulations on successfully entering your password!</p>");
 
-  if (req->getHeader(HEADER_GROUP) == "ADMIN") {
+  if (req->getHeader(HEADER_GROUP) == "ADMIN")
+  {
     res->println("<div style=\"border:1px solid red;margin:20px auto;padding:10px;background:#ff8080\">");
     res->println("<h2>You are an administrator</h2>");
     res->println("<p>You are allowed to access the admin page:</p>");
@@ -193,15 +230,60 @@ void HttpsAuthServer::handleInternalPage(HTTPRequest * req, HTTPResponse * res) 
 
   res->println("<p><a href=\"/\">Go back home</a></p>");
   res->println("</body></html>");
+
+  std::__cxx11::string dmxAddress;
+  std::__cxx11::string dmxUniverse;
+  std::__cxx11::string dmxInputType;
+  std::__cxx11::string dmxMode;
+  if (req->getParams()->getQueryParameter("dmxAddress", dmxAddress))
+  {
+    uint16_t value = atoi(dmxAddress.c_str());
+    if (value < 0 || value > 512) {
+        Serial.println("Invalid DMX address!");
+    }else{
+        s_configManager->setDmxAddress(value);
+    }
+  }
+  if (req->getParams()->getQueryParameter("dmxUniverse", dmxUniverse))
+  {
+    uint16_t value = atoi(dmxUniverse.c_str());
+    if (value < 0) {
+        Serial.println("Invalid DMX universe!");
+    }else{
+        s_configManager->setArtnetUniverse(value);
+    }
+  }
+  if (req->getParams()->getQueryParameter("dmxInputType", dmxInputType))
+  {
+    uint16_t value = atoi(dmxInputType.c_str());
+    if (value < 0 || value > 1) {
+        Serial.println("Invalid dmx InputType!");
+    }else{
+        s_configManager->setDmxInputType(static_cast<DMXReceivers>(value));
+    }
+  }
+  if (req->getParams()->getQueryParameter("dmxMode", dmxMode))
+  {
+    uint16_t value = atoi(dmxMode.c_str());
+    if (value < 0 || value > 3) {
+        Serial.println("Invalid dmx Mode!");
+    }else{
+        s_configManager->setDmxMode(static_cast<DmxMode>(value));
+    }
+  }
+  
+  s_configManager->printConfig();
 }
 
-void HttpsAuthServer::handleAdminPage(HTTPRequest * req, HTTPResponse * res) {
+void HttpsAuthServer::handleAdminPage(HTTPRequest *req, HTTPResponse *res)
+{
   res->setHeader("Content-Type", "text/html; charset=utf8");
 
   std::string header = "<!DOCTYPE html><html><head><title>Secret Admin Page</title></head><body><h1>Secret Admin Page</h1>";
   std::string footer = "</body></html>";
 
-  if (req->getHeader(HEADER_GROUP) == "ADMIN") {
+  if (req->getHeader(HEADER_GROUP) == "ADMIN")
+  {
     res->setStatusCode(200);
     res->setStatusText("OK");
     res->printStd(header);
@@ -210,7 +292,9 @@ void HttpsAuthServer::handleAdminPage(HTTPRequest * req, HTTPResponse * res) {
     res->println("<p>You found the secret administrator page!</p>");
     res->println("<p><a href=\"/internal\">Go back</a></p>");
     res->println("</div>");
-  } else {
+  }
+  else
+  {
     res->printStd(header);
     res->setStatusCode(403);
     res->setStatusText("Unauthorized");
@@ -220,7 +304,8 @@ void HttpsAuthServer::handleAdminPage(HTTPRequest * req, HTTPResponse * res) {
   res->printStd(footer);
 }
 
-void HttpsAuthServer::handlePublicPage(HTTPRequest * req, HTTPResponse * res) {
+void HttpsAuthServer::handlePublicPage(HTTPRequest *req, HTTPResponse *res)
+{
   res->setHeader("Content-Type", "text/html");
   res->println("<!DOCTYPE html>");
   res->println("<html>");
@@ -228,20 +313,15 @@ void HttpsAuthServer::handlePublicPage(HTTPRequest * req, HTTPResponse * res) {
   res->println("<body>");
   res->println("<h1>Hello World!</h1>");
   res->print("<p>Your server is running for ");
-  res->print((int)(millis()/1000), DEC);
+  res->print((int)(millis() / 1000), DEC);
   res->println(" seconds.</p>");
   res->println("<p><a href=\"/\">Go back</a></p>");
   res->println("</body>");
-  res->println("</html>");  
-  if(s_configManager->getDmxAddress() == 5){
-    s_configManager->setDmxAddress(0);  
-  }else{
-    s_configManager->setDmxAddress(5);
-  }
-  s_configManager->printConfig();
+  res->println("</html>");
 }
 
-void HttpsAuthServer::handleRoot(HTTPRequest * req, HTTPResponse * res) {
+void HttpsAuthServer::handleRoot(HTTPRequest *req, HTTPResponse *res)
+{
   res->setHeader("Content-Type", "text/html");
   res->println("<!DOCTYPE html>");
   res->println("<html>");
@@ -255,7 +335,8 @@ void HttpsAuthServer::handleRoot(HTTPRequest * req, HTTPResponse * res) {
   res->println("</html>");
 }
 
-void HttpsAuthServer::handle404(HTTPRequest * req, HTTPResponse * res) {
+void HttpsAuthServer::handle404(HTTPRequest *req, HTTPResponse *res)
+{
   req->discardRequestBody();
   res->setStatusCode(404);
   res->setStatusText("Not Found");

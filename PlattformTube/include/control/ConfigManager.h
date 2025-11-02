@@ -1,8 +1,9 @@
+#ifndef CONFIGMANAGER_H
+#define CONFIGMANAGER_H
 
 #pragma once
 
-#ifndef CONFIGMANAGER_H
-#define CONFIGMANAGER_H
+
 #include <Arduino.h>
 #include "DMXMode.h"
 #include "drivers/IDMXReceiver.h"
@@ -14,6 +15,8 @@ public:
     void printConfig();
     void loadFromEEPROM();
     void saveToEEPROM();
+    void registerReceiverUpdateCallback(void (*callback)(DMXReceivers dmxReceivers));
+    void registerDmxModeUpdateCallback(void (*callback)(DmxMode dmxMode));
     uint16_t setDmxAddress(uint16_t dmxAddress);
     uint16_t setArtnetUniverse(uint16_t artnetUniverse);
     DmxMode setDmxMode(DmxMode dmxMode);
@@ -28,6 +31,8 @@ private:
     uint8_t dmxInputType = 1;
     uint8_t dmxMode = 1;
     SemaphoreHandle_t mutex;
+    void (*receiverUpdate)(DMXReceivers dmxReceivers);
+    void (*dmxModeUpdate)(DmxMode dmxMode);
 };
 
 #endif // CONFIGMANAGER_H

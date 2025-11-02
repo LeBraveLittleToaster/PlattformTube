@@ -3,12 +3,11 @@
 
 #include "drivers/IDMXReceiver.h"
 #include "drivers/ILEDDriver.h"
-#include "ConfigManager.h"
 #include "control/Ticker.h"
 #include "control/Player.h"
+#include "control/ConfigManager.h"
 #include "Segment.h"
 
-IDMXReceiver* getDmxReceiver(ConfigManager* config);
 
 /**
  * @brief Factory function to create an array of Segment pointers.
@@ -72,6 +71,15 @@ public:
      */
     void print();
 
+    
+    boolean setDmxPlayer(DMXPlayer* player);
+
+    boolean setDmxReceiver(IDMXReceiver* receiver);
+    
+    boolean deleteDmxPlayer();
+
+    boolean deleteDmxReceiver();
+
     /**
      * @brief Destructor to clean up resources.
      */
@@ -82,6 +90,7 @@ private:
     ConfigManager* config;   ///< Configuration manager pointer
     Ticker* ticker;          ///< Timing control pointer
     DMXPlayer* dmxPlayer;    ///< DMX player controlling the LED segments
+    SemaphoreHandle_t mutex;   ///< Mutex for thread-safe operations
 };
 
 #endif // LIGHTTUBE_H

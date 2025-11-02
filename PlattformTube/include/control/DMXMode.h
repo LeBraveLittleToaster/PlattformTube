@@ -13,10 +13,10 @@
  */
 enum DmxMode
 {
-    DMX_1,  // INDEX=0 | Dimmer Only, White
-    DMX_4,  // INDEX=1 | Dimmer, R, G, B
-    DMX_32, // INDEX=2 | 8 Segments X {Dimmer, R, G, B}
-    DMX_64  // INDEX=3 | 16 Segments X {Dimmer, R, G, B}
+    DMX_1 = 0,  // INDEX=0 | Dimmer Only, White
+    DMX_4 = 1,  // INDEX=1 | Dimmer, R, G, B
+    DMX_32 = 2, // INDEX=2 | 8 Segments X {Dimmer, R, G, B}
+    DMX_64 = 3 // INDEX=3 | 16 Segments X {Dimmer, R, G, B}
 };
 
 uint8_t getSegmentCount (DmxMode tv);

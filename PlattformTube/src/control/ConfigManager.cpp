@@ -18,6 +18,13 @@ ConfigManager::ConfigManager(uint16_t artnetUniverse, uint16_t dmxAddr, DMXRecei
   saveToEEPROM();
 }
 
+void ConfigManager::registerReceiverUpdateCallback(void (*callback)(DMXReceivers dmxReceivers)){
+  this->receiverUpdate = callback;
+}
+void ConfigManager::registerDmxModeUpdateCallback(void (*callback)(DmxMode dmxMode)){
+  this->dmxModeUpdate = callback;
+}
+
 /**
  * @brief Loads the DMX address from EEPROM.
  *
@@ -122,12 +129,14 @@ DmxMode ConfigManager::setDmxMode(DmxMode dmxMode)
 {
   xSemaphoreTake(mutex,portMAX_DELAY);
   this->dmxMode = dmxMode;
+  dmxModeUpdate(dmxMode);
   xSemaphoreGive(mutex);
   return dmxMode;
 }
 DMXReceivers ConfigManager::setDmxInputType(DMXReceivers receiverType){
   xSemaphoreTake(mutex,portMAX_DELAY);
   this->dmxInputType = receiverType;
+  receiverUpdate(receiverType);
   xSemaphoreGive(mutex);
   return receiverType;
 }

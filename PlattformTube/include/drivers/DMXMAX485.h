@@ -21,7 +21,7 @@ public:
     uint8_t* getBuffer() override;
     int getBufferSize() override;
     uint8_t getChannel(int channel) override;
-    virtual ~DMXMAX485();
+    virtual ~DMXMAX485() override;
 
 private:
     dmx_port_t dmxPort;
