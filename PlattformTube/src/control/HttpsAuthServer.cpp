@@ -126,7 +126,6 @@ void HttpsAuthServer::loop()
   {
     s_server->loop();
   }
-  // delay(.01);
 }
 
 /* ===================== Middleware ===================== */
@@ -253,13 +252,13 @@ void HttpsAuthServer::handleInternalPage(HTTPRequest *req, HTTPResponse *res)
         s_configManager->setArtnetUniverse(value);
     }
   }
-  if (req->getParams()->getQueryParameter("dmxInputType", dmxInputType))
+  if (req->getParams()->getQueryParameter("d,mxReceiverType", dmxInputType))
   {
     uint16_t value = atoi(dmxInputType.c_str());
     if (value < 0 || value > 1) {
         Serial.println("Invalid dmx InputType!");
     }else{
-        s_configManager->setDmxInputType(static_cast<DMXReceivers>(value));
+        s_configManager->setDmxReceiverType(static_cast<DmxReceiverType>(value));
     }
   }
   if (req->getParams()->getQueryParameter("dmxMode", dmxMode))

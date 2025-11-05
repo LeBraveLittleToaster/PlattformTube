@@ -18,6 +18,7 @@ public:
     virtual void begin() override;
     virtual bool readData() override;
     virtual void loop() override;
+    virtual void stop() override;
     uint8_t* getBuffer() override;
     int getBufferSize() override;
     uint8_t getChannel(int channel) override;

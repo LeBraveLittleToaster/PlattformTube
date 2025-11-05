@@ -22,12 +22,13 @@ boolean Artnet::ConnectWifi(void)
 {
   boolean state = true;
   int i = 0;
-
+  if(WiFi.status() == WL_CONNECTED) {
+    Serial.println("Already connected to WiFi");
+    return true;
+  }
   WiFi.begin(WLAN_SSID, WLAN_PASSWORD);
-  Serial.println("");
   Serial.println("Connecting to WiFi");
 
-  Serial.print("Connecting");
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
@@ -74,12 +75,9 @@ void Artnet::onDmxStatic(uint16_t universe, uint16_t length,
 void Artnet::onDmx(uint16_t universe, uint16_t length,
                    uint8_t sequence, const uint8_t *data)
 {
-  Serial.print("Universe: ");
-  Serial.println(universe);
   for (uint8_t i = 0; i < length; i++)
   {
     dmxBuffer[i] = data[i];
-    Serial.print(dmxBuffer[i]);
   }
 }
 
@@ -99,6 +97,11 @@ void Artnet::begin()
 void Artnet::loop()
 {
   artnet.read();
+}
+
+void Artnet::stop()
+{
+  artnet.stop();
 }
 
 bool Artnet::readData()

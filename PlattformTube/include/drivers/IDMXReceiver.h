@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-enum DMXReceivers {
+enum DmxReceiverType {
     WIRED_DMX = 0,
     ARTNET = 1
 };
@@ -13,6 +13,7 @@ public:
     
     virtual void begin() = 0;
     virtual void loop() = 0;
+    virtual void stop() = 0;
     virtual bool readData() = 0;
     virtual uint8_t* getBuffer() = 0;
     virtual int getBufferSize() = 0;

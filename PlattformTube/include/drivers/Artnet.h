@@ -12,6 +12,7 @@ public:
     ~Artnet() override;
     virtual void loop() override;
     virtual void begin() override;
+    virtual void stop() override;
     virtual uint8_t getChannel(int channel) override;
     int getBufferSize() override;
     virtual bool readData() override;

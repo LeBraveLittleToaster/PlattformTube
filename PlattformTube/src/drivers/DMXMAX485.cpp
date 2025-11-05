@@ -56,6 +56,10 @@ void DMXMAX485::loop(){
     // No implementation needed for now
 }
 
+void DMXMAX485::stop(){
+    // No implementation needed for now
+}
+
 DMXMAX485::~DMXMAX485() {
     dmx_driver_delete(dmxPort);
 }

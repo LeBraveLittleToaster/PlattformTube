@@ -9,28 +9,31 @@
 #include "Segment.h"
 
 
-/**
- * @brief Factory function to create an array of Segment pointers.
- * 
- * @param segmentCount Number of segments to create.
- * @param driver Pointer to an LED driver instance.
- * @return Pointer to the first Segment (likely an array or dynamically allocated).
- * 
- * Note: The ownership and memory management of the returned segments is not specified here.
- */
-Segment* getSegments(uint8_t segmentCount, ILEDDriver* driver);
 
 /**
- * @brief Factory function to create a DMXPlayer instance based on mode and segments.
- * 
- * @param dmxMode DMX mode (e.g. DMX_1, DMX_4, DMX_32, DMX_64).
- * @param segmentCount Number of segments to control.
- * @param driver Pointer to an LED driver instance.
- * @return Pointer to a new DMXPlayer configured for the given parameters.
- * 
- * Note: Caller is responsible for managing the lifetime of the returned DMXPlayer.
+ * @brief Create an owning array of Segment objects.
+ *
+ * Divides the strip into @p segmentCount segments as evenly as possible.
+ * Ownership is returned as std::unique_ptr<Segment[]>; the caller does NOT
+ * delete anything manually.
+ *
+ * @param segmentCount Number of segments to create (will be clamped to total pixels).
+ * @param driver Non-owning pointer to the LED driver (used to query pixel count).
+ * @return std::unique_ptr<Segment[]> owning the array (nullptr on error).
  */
-DMXPlayer* getDMXPlayer(DmxMode dmxMode, ILEDDriver *driver);
+std::unique_ptr<Segment[]> getSegments(uint8_t segmentCount, ILEDDriver* driver);
+
+/**
+ * @brief Create a DMXPlayer instance for the given mode.
+ *
+ * Builds the segment array internally and transfers its ownership to the player.
+ * The returned std::unique_ptr<DMXPlayer> clearly expresses lifetime ownership.
+ *
+ * @param dmxMode Target DMX mode (DMX_1, DMX_4, DMX_32, DMX_64).
+ * @param driver Non-owning pointer to the LED driver.
+ * @return std::unique_ptr<DMXPlayer> (nullptr on error).
+ */
+std::unique_ptr<DMXPlayer> getDMXPlayer(DmxMode dmxMode, ILEDDriver* driver);
 
 /**
  * @class LightTube
@@ -48,7 +51,7 @@ public:
      * @param config Pointer to configuration manager instance.
      * @param dmxPlayer Pointer to a DMXPlayer controlling LED segments.
      */
-    LightTube(IDMXReceiver* dmx, Ticker* ticker, ConfigManager* config, DMXPlayer* dmxPlayer);
+    LightTube(Ticker* ticker, ConfigManager* config);
 
     /**
      * @brief Initialize hardware and internal states.
@@ -72,9 +75,9 @@ public:
     void print();
 
     
-    boolean setDmxPlayer(DMXPlayer* player);
+    boolean setDmxPlayer(std::unique_ptr<DMXPlayer> player);
 
-    boolean setDmxReceiver(IDMXReceiver* receiver);
+    boolean setDmxReceiver(std::unique_ptr<IDMXReceiver> receiver);
     
     boolean deleteDmxPlayer();
 
@@ -86,10 +89,10 @@ public:
     ~LightTube();
 
 private:
-    IDMXReceiver* dmx;       ///< DMX receiver interface pointer
+    std::unique_ptr<IDMXReceiver> dmxReceiver;       ///< DMX receiver interface pointer
     ConfigManager* config;   ///< Configuration manager pointer
-    Ticker* ticker;          ///< Timing control pointer
-    DMXPlayer* dmxPlayer;    ///< DMX player controlling the LED segments
+    std::unique_ptr<Ticker> ticker;          ///< Timing control pointer
+    std::unique_ptr<DMXPlayer> dmxPlayer;    ///< DMX player controlling the LED segments
     SemaphoreHandle_t mutex;   ///< Mutex for thread-safe operations
 };
 

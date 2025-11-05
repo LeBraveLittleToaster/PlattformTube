@@ -1,60 +1,79 @@
+#pragma once
+#include <cstdint>
+#include <cstddef>
+#include <memory>
+
 #include "control/Segment.h"
 #include "DMXMode.h"
 
-#pragma once
 /**
  * @class DMXPlayer
  * @brief Abstract base class for DMX players controlling LED segments.
  *
- * Manages segments and LED driver based on the DMX mode.
- * Defines interface for handling DMX data and LED updates.
+ * Owns the Segment array via unique_ptr<Segment[]>.
  */
 class DMXPlayer
 {
 public:
     /**
      * @brief Construct a DMXPlayer.
-     * @param segments Pointer to array of segments to control.
-     * @param segmentCount Number of segments.
-     * @param leds Pointer to LED driver interface.
+     * @param segments  unique_ptr owning an array of Segment.
+     * @param segmentCount Number of segments in the array.
+     * @param leds Pointer to LED driver interface (non-owning).
      * @param dmxMode DMX mode this player supports.
      */
-    DMXPlayer(Segment *segments, uint8_t segmentCount,ILEDDriver *leds, DmxMode dmxMode);
+    DMXPlayer(std::unique_ptr<Segment[]> segments,
+              uint8_t segmentCount,
+              ILEDDriver* leds,
+              DmxMode dmxMode)
+        : dmxMode(dmxMode),
+          segments_(std::move(segments)),
+          segmentCount_(segmentCount),
+          driver(leds)
+    {}
 
-    /**
-     * @brief Virtual destructor for safe polymorphic use.
-     */
-    virtual ~DMXPlayer();
+    virtual ~DMXPlayer() = default;             // polymorph sicher
+
+    // Nicht kopierbar (Ownership eindeutig)
+    DMXPlayer(const DMXPlayer&) = delete;
+    DMXPlayer& operator=(const DMXPlayer&) = delete;
+
+    // Bewegbar (Ownership-Transfer erlaubt)
+    DMXPlayer(DMXPlayer&&) = default;
+    DMXPlayer& operator=(DMXPlayer&&) = default;
 
     /**
      * @brief Main update loop when DMX data is present.
-     * @param data Pointer to DMXData containing the latest DMX values.
      */
     virtual void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) = 0;
 
     /**
-     * @brief Update loop for when no DMX data is available.
-     *        Typically runs fallback animations or idle behavior.
+     * @brief Update loop when no DMX data is available.
      */
     virtual void loopWithoutDMX() = 0;
 
     /**
-     * @brief Initialization routine, called before main loop.
+     * @brief Initialization and shutdown.
      */
     virtual void begin() = 0;
+    virtual void stop() = 0;
 
-    /**
-     * @brief Get the DMX mode supported by this player.
-     * @return DmxMode enum value.
-     */
-    DmxMode getPlayerDmxType() { return dmxMode; }
+    DmxMode getPlayerDmxType() const { return dmxMode; }
 
 protected:
-    DmxMode dmxMode;      ///< DMX mode handled by this player.
-    Segment *segments;    ///< Pointer to controlled segments.
-    uint8_t segmentCount; ///< Number of segments controlled.
-    ILEDDriver *driver;   ///< LED driver interface.
+    // Bequemer Zugriff für abgeleitete Klassen
+    Segment& segmentAt(std::size_t i)             { return segments_[i]; }
+    const Segment& segmentAt(std::size_t i) const { return segments_[i]; }
+    Segment* segmentsRaw()                        { return segments_.get(); }
+    const Segment* segmentsRaw() const            { return segments_.get(); }
+    uint8_t segmentCount() const                  { return segmentCount_; }
+
+    DmxMode dmxMode;
+    std::unique_ptr<Segment[]> segments_;   ///< OWNS the array of segments
+    uint8_t segmentCount_;                  ///< Number of segments
+    ILEDDriver* driver;                     ///< Non-owning LED driver interface
 };
+
 
 /**
  * @class DMX1Player
@@ -63,17 +82,19 @@ protected:
 class DMX1Player : public DMXPlayer
 {
 public:
-    DMX1Player(Segment *segments, uint8_t segmentCount, ILEDDriver *leds)
-        : DMXPlayer(segments, segmentCount, leds, DmxMode::DMX_1) {}
-    ~DMX1Player() override {}
+    DMX1Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_1) {}
+    ~DMX1Player() override = default;
 
     void begin() override;
+    void stop() override;
     void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:
-    DMX1 data; ///< Storage for current DMX1 data.
+    DMX1 data;
 };
+
 
 /**
  * @class DMX4Player
@@ -82,17 +103,19 @@ private:
 class DMX4Player : public DMXPlayer
 {
 public:
-    DMX4Player(Segment *segments, uint8_t segmentCount, ILEDDriver *leds)
-        : DMXPlayer(segments, segmentCount, leds, DmxMode::DMX_4) {}
-    ~DMX4Player() override {}
+    DMX4Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_4) {}
+    ~DMX4Player() override = default;
 
     void begin() override;
+    void stop() override;
     void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:
-    DMX4 data; ///< Storage for current DMX4 data.
+    DMX4 data;
 };
+
 
 /**
  * @class DMX32Player
@@ -101,17 +124,19 @@ private:
 class DMX32Player : public DMXPlayer
 {
 public:
-    DMX32Player(Segment *segments, uint8_t segmentCount, ILEDDriver *leds)
-        : DMXPlayer(segments, segmentCount, leds, DmxMode::DMX_32) {}
-    ~DMX32Player() override {}
+    DMX32Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_32) {}
+    ~DMX32Player() override = default;
 
     void begin() override;
+    void stop() override;
     void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:
-    DMX32 data; ///< Storage for current DMX32 data.
+    DMX32 data;
 };
+
 
 /**
  * @class DMX64Player
@@ -120,15 +145,15 @@ private:
 class DMX64Player : public DMXPlayer
 {
 public:
-    DMX64Player(Segment *segments, uint8_t segmentCount, ILEDDriver *leds)
-        : DMXPlayer(segments, segmentCount, leds, DmxMode::DMX_64) {}
-    ~DMX64Player() override {}
+    DMX64Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_64) {}
+    ~DMX64Player() override = default;
 
     void begin() override;
+    void stop() override;
     void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:
-    DMX64 data; ///< Storage for current DMX64 data.
+    DMX64 data;
 };
-
