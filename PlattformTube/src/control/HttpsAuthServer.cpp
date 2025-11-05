@@ -252,11 +252,11 @@ void HttpsAuthServer::handleInternalPage(HTTPRequest *req, HTTPResponse *res)
         s_configManager->setArtnetUniverse(value);
     }
   }
-  if (req->getParams()->getQueryParameter("d,mxReceiverType", dmxInputType))
+  if (req->getParams()->getQueryParameter("dmxReceiverType", dmxInputType))
   {
     uint16_t value = atoi(dmxInputType.c_str());
     if (value < 0 || value > 1) {
-        Serial.println("Invalid dmx InputType!");
+        Serial.println("Invalid dmx dmxReceiverType!");
     }else{
         s_configManager->setDmxReceiverType(static_cast<DmxReceiverType>(value));
     }
