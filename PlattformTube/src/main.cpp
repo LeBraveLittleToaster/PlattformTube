@@ -75,19 +75,18 @@ void updateDmxModeCallback(DmxMode dmxMode)
   if (newPlayer)
   {
     tube.setDmxPlayer(std::move(newPlayer));
-    tube.setup();
   }
   else
   {
     Serial.println("Failed to create DMXPlayer for new mode");
   }
+  tube.resume();
 }
 
 void updateReceiverCallback(DmxReceiverType dmxReceivers)
 {
   Serial.print("DMX Receiver updated to: ");
-
-
+  Serial.println(static_cast<int>(dmxReceivers));
   tube.pause();
   switch (dmxReceivers)
   {
@@ -109,8 +108,7 @@ void updateReceiverCallback(DmxReceiverType dmxReceivers)
     Serial.println("Unknown");
     return;
   }
-
-  tube.setup();
+  tube.resume();
 }
 
 // ----------------- Setup/Loop -----------------

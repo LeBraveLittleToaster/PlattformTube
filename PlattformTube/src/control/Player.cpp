@@ -1,4 +1,5 @@
 #include "control/Player.h"
+#include <memory>
 
 // ========================= DMX1Player =========================
 
@@ -16,9 +17,9 @@ void DMX1Player::stop()
 void DMX1Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr)
 {
     Serial.println("Loop DMX1");
-    DMX1 dmx = getDMX1FromDMXBuffer(buffer, bufferSize, dmxAddr);
+    std::unique_ptr<DMX1> dmx = getDMX1FromDMXBuffer(buffer, bufferSize, dmxAddr);
 
-    driver->setBrightness(dmx.dimmer);
+    driver->setBrightness(dmx->dimmer);
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
     {
         const Segment& seg = segmentAt(segIdx);
@@ -51,15 +52,16 @@ void DMX5Player::stop()
 
 void DMX5Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr)
 {
-    DMX5 dmx = getDMX5FromDMXBuffer(buffer, bufferSize, dmxAddr);
+    Serial.println("DMX5Player::loopWithDMX");
+    std::unique_ptr<DMX5> dmx = getDMX5FromDMXBuffer(buffer, bufferSize, dmxAddr);
 
-    driver->setBrightness(dmx.dimmer);
+    driver->setBrightness(dmx->dimmer);
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
     {
         const Segment& seg = segmentAt(segIdx);
         for (int i = seg.startIdx; i <= seg.endIdx; i++)
         {
-            driver->setPixelRGB(i, dmx.r, dmx.g, dmx.b, 0);
+            driver->setPixelRGB(i, dmx->r, dmx->g, dmx->b, 0);
         }
     }
     driver->show();
@@ -87,12 +89,12 @@ void DMX30Player::stop()
 
 void DMX30Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr)
 {
-    DMX30 dmx = getDMX30FromDMXBuffer(buffer, bufferSize, dmxAddr);
-
+    std::unique_ptr<DMX30> dmx = getDMX30FromDMXBuffer(buffer, bufferSize, dmxAddr);
+    Serial.println("DMX30Player::loopWithDMX");
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
     {
-        const DMX5 dmx5 = dmx.segments[segIdx];
-
+        auto& dmx5 = *dmx->segments[segIdx];
+        Serial.println("DMX5 Segment " + String(segIdx) + ": Dimmer=" + String(dmx5.dimmer) + " R=" + String(dmx5.r) + " G=" + String(dmx5.g) + " B=" + String(dmx5.b));
         // TODO: Proper scaling for LED dimmers
         const uint8_t r = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.r) + 127) / 255;
         const uint8_t g = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.g) + 127) / 255;
@@ -101,6 +103,7 @@ void DMX30Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAd
         const Segment& seg = segmentAt(segIdx);
         for (int i = seg.startIdx; i <= seg.endIdx; i++)
         {
+            Serial.println("Setting pixel " + String(i) + " to R:" + String(r) + " G:" + String(g) + " B:" + String(b));
             driver->setPixelRGB(i, r, g, b, 0);
         }
     }
@@ -130,24 +133,12 @@ void DMX40Player::stop()
 void DMX40Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr)
 {
     Serial.println("DMX40Player::loopWithDMX");
-    const DMX40 dmx = getDMX40FromDMXBuffer(buffer, bufferSize, dmxAddr);
+    std::unique_ptr<DMX40> dmx = getDMX40FromDMXBuffer(buffer, bufferSize, dmxAddr);
 
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
     {
         
-        const DMX5 dmx5 = dmx.segments[segIdx];
-        Serial.print("Segment ");
-        Serial.print(segIdx);
-        Serial.print(": D=");
-        Serial.print(dmx5.dimmer);
-        Serial.print(" R=");
-        Serial.print(dmx5.r);
-        Serial.print(" G=");
-        Serial.print(dmx5.g);
-        Serial.print(" B=");
-        Serial.print(dmx5.b);
-        Serial.print(" W=");
-        Serial.println(dmx5.w);
+        auto& dmx5 = *dmx->segments[segIdx];
 
         // TODO: Proper scaling for LED dimmers
         
@@ -182,11 +173,11 @@ void DMX80Player::stop()
 
 void DMX80Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr)
 {
-    const DMX80 dmx = getDMX80FromDMXBuffer(buffer, bufferSize, dmxAddr);
+    std::unique_ptr<DMX80> dmx = getDMX80FromDMXBuffer(buffer, bufferSize, dmxAddr);
 
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
     {
-        const DMX5 dmx5 = dmx.segments[segIdx];
+        auto& dmx5 = *dmx->segments[segIdx];
 
         // TODO: Proper scaling for LED dimmers
         const uint8_t r = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.r) + 127) / 255;

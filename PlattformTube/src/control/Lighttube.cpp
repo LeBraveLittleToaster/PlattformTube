@@ -62,26 +62,14 @@ std::unique_ptr<Segment[]> getSegments(uint8_t segmentCount, ILEDDriver* driver)
 void LightTube::resume()
 {
     Serial.println("Resume LightTube");
-    if (dmxReceiver)
-    {
-        Serial.println("Resume DMX Receiver");
-        dmxReceiver->begin();
-    }else{
-        Serial.println("No DMX Receiver to pause");
-    }
+    isPaused = false;
     Serial.println("LightTube resumed");
 }
 
 void LightTube::pause()
 {
-    Serial.println("Pause LightTube");
-    if (dmxReceiver)
-    {
-        Serial.println("Pause DMX Receiver");
-        dmxReceiver->stop();
-    }else{
-        Serial.println("No DMX Receiver to pause");
-    }
+    Serial.println("Pausing LightTube");
+    isPaused = true;
     Serial.println("LightTube paused");
 }
 
@@ -170,7 +158,7 @@ void LightTube::print()
  * @param config Config manager.
  * @param dmxPlayer DMX player instance.
  */
-LightTube::LightTube(Ticker* ticker, ConfigManager *config) : ticker(ticker), config(config)
+LightTube::LightTube(Ticker* ticker, ConfigManager *config) : ticker(ticker), config(config), isPaused(true)
 {
     mutex = xSemaphoreCreateMutex();
 }
@@ -201,6 +189,7 @@ void LightTube::setup()
     Serial.println("Starting Ticker");
     ticker->start();
     Serial.println("LightTube setup complete");
+    isPaused = false;
 }
 
 boolean LightTube::deleteDmxPlayer()
@@ -267,11 +256,12 @@ boolean LightTube::setDmxReceiver(std::unique_ptr<IDMXReceiver> receiver)
 /**
  * @brief Main loop function for LightTube.
  *
- * Reads mock DMX buffer data and routes it to the DMXPlayer based on mode.
- * Uses a ticker to control timing.
  */
 void LightTube::loop()
 {
+    if(isPaused){
+        return;
+    }
     if(ticker == nullptr || dmxReceiver == nullptr || dmxPlayer == nullptr)
     {
         return;
@@ -285,6 +275,7 @@ void LightTube::loop()
         dmxReceiver->readData();
         // TODO: Varying buffer size
         dmxPlayer->loopWithDMX(dmxReceiver->getBuffer(), dmxReceiver->getBufferSize(), config->getDmxAddress());
+
     }
     else
     {

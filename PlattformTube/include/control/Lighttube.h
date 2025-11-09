@@ -97,7 +97,8 @@ private:
     ConfigManager* config;   ///< Configuration manager pointer
     std::unique_ptr<Ticker> ticker;          ///< Timing control pointer
     std::unique_ptr<DMXPlayer> dmxPlayer;    ///< DMX player controlling the LED segments
-    SemaphoreHandle_t mutex;   ///< Mutex for thread-safe operations
+    SemaphoreHandle_t mutex; ///< Mutex for thread-safe operations
+    boolean isPaused;  
 };
 
 #endif // LIGHTTUBE_H
