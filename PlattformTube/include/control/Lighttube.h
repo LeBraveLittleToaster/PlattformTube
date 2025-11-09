@@ -74,6 +74,10 @@ public:
      */
     void print();
 
+    void pause();
+
+    void resume();
+
     
     boolean setDmxPlayer(std::unique_ptr<DMXPlayer> player);
 

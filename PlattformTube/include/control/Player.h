@@ -100,12 +100,12 @@ private:
  * @class DMX4Player
  * @brief DMXPlayer implementation for DMX_4 mode (dimmer + RGB).
  */
-class DMX4Player : public DMXPlayer
+class DMX5Player : public DMXPlayer
 {
 public:
-    DMX4Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
-        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_4) {}
-    ~DMX4Player() override = default;
+    DMX5Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_5) {}
+    ~DMX5Player() override = default;
 
     void begin() override;
     void stop() override;
@@ -113,7 +113,7 @@ public:
     void loopWithoutDMX() override;
 
 private:
-    DMX4 data;
+    DMX5 data;
 };
 
 
@@ -121,12 +121,12 @@ private:
  * @class DMX32Player
  * @brief DMXPlayer implementation for DMX_32 mode (8 segments with dimmer + RGB).
  */
-class DMX32Player : public DMXPlayer
+class DMX30Player : public DMXPlayer
 {
 public:
-    DMX32Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
-        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_32) {}
-    ~DMX32Player() override = default;
+    DMX30Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_30) {}
+    ~DMX30Player() override = default;
 
     void begin() override;
     void stop() override;
@@ -134,7 +134,7 @@ public:
     void loopWithoutDMX() override;
 
 private:
-    DMX32 data;
+    DMX30 data;
 };
 
 
@@ -142,12 +142,12 @@ private:
  * @class DMX64Player
  * @brief DMXPlayer implementation for DMX_64 mode (16 segments with dimmer + RGB).
  */
-class DMX64Player : public DMXPlayer
+class DMX40Player : public DMXPlayer
 {
 public:
-    DMX64Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
-        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_64) {}
-    ~DMX64Player() override = default;
+    DMX40Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_40) {}
+    ~DMX40Player() override = default;
 
     void begin() override;
     void stop() override;
@@ -155,5 +155,25 @@ public:
     void loopWithoutDMX() override;
 
 private:
-    DMX64 data;
+    DMX40 data;
+};
+
+/**
+ * @class DMX64Player
+ * @brief DMXPlayer implementation for DMX_64 mode (16 segments with dimmer + RGB).
+ */
+class DMX80Player : public DMXPlayer
+{
+public:
+    DMX80Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_80) {}
+    ~DMX80Player() override = default;
+
+    void begin() override;
+    void stop() override;
+    void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
+    void loopWithoutDMX() override;
+
+private:
+    DMX80 data;
 };

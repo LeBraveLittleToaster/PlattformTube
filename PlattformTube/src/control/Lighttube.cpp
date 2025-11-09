@@ -11,23 +11,32 @@
  */
 std::unique_ptr<Segment[]> getSegments(uint8_t segmentCount, ILEDDriver* driver)
 {
+
+
     if (!driver || segmentCount == 0) {
-        return {}; // nullptr => no segments
+        Serial.println("Driver not present or segmentCount is zero on creation of segments");
+        return {};
     }
 
-    // Use a wide type; strips often exceed 255 pixels
     const uint16_t totalPixels = static_cast<uint16_t>(driver->getTotalPixelCount());
     if (totalPixels == 0) {
         return {};
     }
 
-    // Clamp: can't have more segments than pixels
     const uint8_t actualSegments = static_cast<uint8_t>(std::min<uint16_t>(segmentCount, totalPixels));
-
+    Serial.print("Should create ");
+    Serial.print(static_cast<int>(segmentCount));
+    Serial.print(" segments for ");
+    Serial.println(static_cast<int>(totalPixels));
+    Serial.print("Creating actually");
+    Serial.print(static_cast<int>(actualSegments));
+    Serial.print(" segments for ");
+    Serial.print(static_cast<int>(totalPixels));
+    Serial.println(" total pixels.");
     auto segments = std::make_unique<Segment[]>(actualSegments);
 
-    const uint16_t base = totalPixels / actualSegments;     // minimum LEDs per segment
-    uint16_t rem = totalPixels % actualSegments;            // leftover LEDs to distribute
+    const uint16_t base = totalPixels / actualSegments;     
+    uint16_t rem = totalPixels % actualSegments;
     uint16_t cursor = 0;
 
     for (uint8_t i = 0; i < actualSegments; ++i)
@@ -38,14 +47,42 @@ std::unique_ptr<Segment[]> getSegments(uint8_t segmentCount, ILEDDriver* driver)
         const uint16_t start = cursor;
         const uint16_t end   = (count == 0) ? cursor : static_cast<uint16_t>(cursor + count - 1);
 
-        // Defensive clamp (should be unnecessary if math is right)
         const uint16_t clampedEnd = std::min<uint16_t>(end, (totalPixels == 0 ? 0 : totalPixels - 1));
 
         segments[i] = Segment{ totalPixels, start, clampedEnd };
         cursor = static_cast<uint16_t>(clampedEnd + 1);
     }
+    Serial.print("Created ");
+    Serial.print(static_cast<int>(actualSegments));
+    Serial.println("Segments created.");
 
     return segments;
+}
+
+void LightTube::resume()
+{
+    Serial.println("Resume LightTube");
+    if (dmxReceiver)
+    {
+        Serial.println("Resume DMX Receiver");
+        dmxReceiver->begin();
+    }else{
+        Serial.println("No DMX Receiver to pause");
+    }
+    Serial.println("LightTube resumed");
+}
+
+void LightTube::pause()
+{
+    Serial.println("Pause LightTube");
+    if (dmxReceiver)
+    {
+        Serial.println("Pause DMX Receiver");
+        dmxReceiver->stop();
+    }else{
+        Serial.println("No DMX Receiver to pause");
+    }
+    Serial.println("LightTube paused");
 }
 
 /**
@@ -54,31 +91,38 @@ std::unique_ptr<Segment[]> getSegments(uint8_t segmentCount, ILEDDriver* driver)
  */
 std::unique_ptr<DMXPlayer> getDMXPlayer(DmxMode dmxMode, ILEDDriver* driver)
 {
-    if (!driver) return {};
+    if (!driver){
+        Serial.println("Driver not present on creation of DMXPlayer");
+        return {};
+    }
 
     uint8_t segmentCount = getSegmentCount(dmxMode);
     auto segments = getSegments(segmentCount, driver);
 
     // If segmentation failed, bail out
-    if (!segments) return {};
+    if (!segments) {
+        Serial.println("Failed to create segments for DMX Player");
+        return {};
+    }
+    Serial.print("Creating DMX Player for mode ");
+    Serial.println(static_cast<int>(dmxMode));
 
     switch (dmxMode)
     {
         case DmxMode::DMX_1:
-            Serial.println("Creating DMX1 Player");
             return std::make_unique<DMX1Player>(std::move(segments), segmentCount, driver);
 
-        case DmxMode::DMX_4:
-            Serial.println("Creating DMX4 Player");
-            return std::make_unique<DMX4Player>(std::move(segments), segmentCount, driver);
+        case DmxMode::DMX_5:
+            return std::make_unique<DMX5Player>(std::move(segments), segmentCount, driver);
 
-        case DmxMode::DMX_32:
-            Serial.println("Creating DMX32 Player");
-            return std::make_unique<DMX32Player>(std::move(segments), segmentCount, driver);
+        case DmxMode::DMX_30:
+            return std::make_unique<DMX30Player>(std::move(segments), segmentCount, driver);
 
-        case DmxMode::DMX_64:
-            Serial.println("Creating DMX64 Player");
-            return std::make_unique<DMX64Player>(std::move(segments), segmentCount, driver);
+        case DmxMode::DMX_40:
+            return std::make_unique<DMX40Player>(std::move(segments), segmentCount, driver);
+
+        case DmxMode::DMX_80:
+            return std::make_unique<DMX80Player>(std::move(segments), segmentCount, driver);
     }
 
     return {};

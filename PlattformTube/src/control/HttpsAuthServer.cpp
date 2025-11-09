@@ -31,6 +31,12 @@ void HttpsAuthServer::begin(const char *ssid, const char *password)
   Serial.begin(115200);
   delay(50);
 
+  if(WiFi.status() == WL_CONNECTED) {
+    Serial.println("[HTTPS] WiFi already connected.");
+  }else{
+    Serial.println("[HTTPS] WiFi not connected.");
+  }
+
   // WiFi up (if not already)
   if (WiFi.status() != WL_CONNECTED)
   {
@@ -132,7 +138,7 @@ void HttpsAuthServer::loop()
 
 void HttpsAuthServer::middlewareAuthentication(HTTPRequest *req, HTTPResponse *res, std::function<void()> next)
 {
-  // Nuke any client-provided internal headers — no auth bypasses on our watch.
+  // against header injection attacks
   req->setHeader(HEADER_USERNAME, "");
   req->setHeader(HEADER_GROUP, "");
 
@@ -145,7 +151,6 @@ void HttpsAuthServer::middlewareAuthentication(HTTPRequest *req, HTTPResponse *r
     bool authValid = true;
     std::string group = "";
 
-    // Yes, hardcoded. This is a demo. Replace with real user storage if you care about security.
     if (reqUsername == "admin" && reqPassword == "secret")
     {
       group = "ADMIN";
@@ -178,6 +183,7 @@ void HttpsAuthServer::middlewareAuthentication(HTTPRequest *req, HTTPResponse *r
   else
   {
     // No attempt — pass through
+    Serial.println("[HTTPS] No authentication provided.");
     next();
   }
 }
@@ -264,7 +270,7 @@ void HttpsAuthServer::handleInternalPage(HTTPRequest *req, HTTPResponse *res)
   if (req->getParams()->getQueryParameter("dmxMode", dmxMode))
   {
     uint16_t value = atoi(dmxMode.c_str());
-    if (value < 0 || value > 3) {
+    if (value < 0 || value > 4) {
         Serial.println("Invalid dmx Mode!");
     }else{
         s_configManager->setDmxMode(static_cast<DmxMode>(value));

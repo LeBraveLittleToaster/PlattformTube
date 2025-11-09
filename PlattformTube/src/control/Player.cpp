@@ -38,20 +38,20 @@ void DMX1Player::loopWithoutDMX()
 
 // ========================= DMX4Player =========================
 
-void DMX4Player::begin()
+void DMX5Player::begin()
 {
-    Serial.println("DMX4Player alive");
+    Serial.println("DMX5Player alive");
     driver->begin();
 }
 
-void DMX4Player::stop()
+void DMX5Player::stop()
 {
     // optional cleanup
 }
 
-void DMX4Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr)
+void DMX5Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr)
 {
-    DMX4 dmx = getDMX4FromDMXBuffer(buffer, bufferSize, dmxAddr);
+    DMX5 dmx = getDMX5FromDMXBuffer(buffer, bufferSize, dmxAddr);
 
     driver->setBrightness(dmx.dimmer);
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
@@ -65,7 +65,7 @@ void DMX4Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAdd
     driver->show();
 }
 
-void DMX4Player::loopWithoutDMX()
+void DMX5Player::loopWithoutDMX()
 {
     // No-op for now
 }
@@ -73,31 +73,30 @@ void DMX4Player::loopWithoutDMX()
 
 // ========================= DMX32Player =========================
 
-void DMX32Player::begin()
+void DMX30Player::begin()
 {
-    Serial.println("DMX32Player alive");
+    Serial.println("DMX30Player alive");
     driver->begin();
     driver->setBrightness(255);
 }
 
-void DMX32Player::stop()
+void DMX30Player::stop()
 {
     // optional cleanup
 }
 
-void DMX32Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr)
+void DMX30Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr)
 {
-    Serial.println("Loop DMX32");
-    DMX32 dmx = getDMX32FromDMXBuffer(buffer, bufferSize, dmxAddr);
+    DMX30 dmx = getDMX30FromDMXBuffer(buffer, bufferSize, dmxAddr);
 
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
     {
-        const DMX4 dmx4 = dmx.segments[segIdx];
+        const DMX5 dmx5 = dmx.segments[segIdx];
 
         // TODO: Proper scaling for LED dimmers
-        const uint8_t r = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.r) + 127) / 255;
-        const uint8_t g = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.g) + 127) / 255;
-        const uint8_t b = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.b) + 127) / 255;
+        const uint8_t r = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.r) + 127) / 255;
+        const uint8_t g = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.g) + 127) / 255;
+        const uint8_t b = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.b) + 127) / 255;
 
         const Segment& seg = segmentAt(segIdx);
         for (int i = seg.startIdx; i <= seg.endIdx; i++)
@@ -108,39 +107,91 @@ void DMX32Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAd
     driver->show();
 }
 
-void DMX32Player::loopWithoutDMX()
+void DMX30Player::loopWithoutDMX()
 {
     // No-op for now
 }
 
 
-// ========================= DMX64Player =========================
+// ========================= DMX40Player =========================
 
-void DMX64Player::begin()
+void DMX40Player::begin()
 {
-    Serial.println("DMX64Player alive");
+    Serial.println("DMX40Player alive");
     driver->begin();
     driver->setBrightness(255);
 }
 
-void DMX64Player::stop()
+void DMX40Player::stop()
 {
     // optional cleanup
 }
 
-void DMX64Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr)
+void DMX40Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr)
 {
-    Serial.println("Loop DMX64");
-    const DMX64 dmx = getDMX64FromDMXBuffer(buffer, bufferSize, dmxAddr);
+    Serial.println("DMX40Player::loopWithDMX");
+    const DMX40 dmx = getDMX40FromDMXBuffer(buffer, bufferSize, dmxAddr);
 
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
     {
-        const DMX4 dmx4 = dmx.segments[segIdx];
+        
+        const DMX5 dmx5 = dmx.segments[segIdx];
+        Serial.print("Segment ");
+        Serial.print(segIdx);
+        Serial.print(": D=");
+        Serial.print(dmx5.dimmer);
+        Serial.print(" R=");
+        Serial.print(dmx5.r);
+        Serial.print(" G=");
+        Serial.print(dmx5.g);
+        Serial.print(" B=");
+        Serial.print(dmx5.b);
+        Serial.print(" W=");
+        Serial.println(dmx5.w);
 
         // TODO: Proper scaling for LED dimmers
-        const uint8_t r = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.r) + 127) / 255;
-        const uint8_t g = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.g) + 127) / 255;
-        const uint8_t b = (static_cast<uint16_t>(dmx4.dimmer) * static_cast<uint16_t>(dmx4.b) + 127) / 255;
+        
+        const Segment& seg = segmentAt(segIdx);
+        // TODO: white is ignored for now
+        for (int i = seg.startIdx; i <= seg.endIdx; i++)
+        {
+            driver->setPixelRGB(i, dmx5.r, dmx5.g, dmx5.b, 0);
+        }
+    }
+    driver->show();
+}
+
+void DMX40Player::loopWithoutDMX()
+{
+    // No-op for now
+}
+
+// ========================= DMX40Player =========================
+
+void DMX80Player::begin()
+{
+    Serial.println("DMX80Player alive");
+    driver->begin();
+    driver->setBrightness(255);
+}
+
+void DMX80Player::stop()
+{
+    // optional cleanup
+}
+
+void DMX80Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr)
+{
+    const DMX80 dmx = getDMX80FromDMXBuffer(buffer, bufferSize, dmxAddr);
+
+    for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
+    {
+        const DMX5 dmx5 = dmx.segments[segIdx];
+
+        // TODO: Proper scaling for LED dimmers
+        const uint8_t r = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.r) + 127) / 255;
+        const uint8_t g = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.g) + 127) / 255;
+        const uint8_t b = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.b) + 127) / 255;
 
         const Segment& seg = segmentAt(segIdx);
         for (int i = seg.startIdx; i <= seg.endIdx; i++)
@@ -151,7 +202,8 @@ void DMX64Player::loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAd
     driver->show();
 }
 
-void DMX64Player::loopWithoutDMX()
+void DMX80Player::loopWithoutDMX()
 {
     // No-op for now
 }
+

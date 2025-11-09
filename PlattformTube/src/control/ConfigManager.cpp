@@ -101,13 +101,17 @@ void ConfigManager::printConfig()
 {
   Serial.println("########### CONFIG #############");
   Serial.print("dmxAddress: ");
-  Serial.println(dmxAddress);
+  Serial.print(dmxAddress);
+  Serial.println(", available channels: 0-512 (- dmxMode channels)");
   Serial.print("artnetUniverse: ");
-  Serial.println(artnetUniverse);
+  Serial.print(artnetUniverse);
+  Serial.println(", available channels: 0-4096");
   Serial.print("dmxReceiverType: ");
-  Serial.println(dmxReceiverType);
+  Serial.print(dmxReceiverType);
+  Serial.println(", available types: 0=WIRED_DMX, 1=ARTNET");
   Serial.print("dmxMode: ");
-  Serial.println(dmxMode);
+  Serial.print(dmxMode);
+  Serial.println(", available modes: 0=DMX_1, 1=DMX_5, 2=DMX_30, 3=DMX_40, 4=DMX_80");
   Serial.println("################################");
 }
 
@@ -116,6 +120,8 @@ boolean ConfigManager::setDmxAddress(uint16_t dmxAddress)
   if(this->dmxAddress == dmxAddress) {
     return dmxAddress;
   }
+  Serial.print("Setting DMX Mode to ");
+  Serial.println(static_cast<int>(dmxMode));
   xSemaphoreTake(mutex,portMAX_DELAY);
   this->dmxAddress = dmxAddress;
   xSemaphoreGive(mutex);
@@ -126,6 +132,8 @@ boolean ConfigManager::setArtnetUniverse(uint16_t artnetUniverse)
   if(this->artnetUniverse == artnetUniverse) {
     return dmxAddress;
   }
+  Serial.print("Setting DMX Mode to ");
+  Serial.println(static_cast<int>(dmxMode));
   xSemaphoreTake(mutex,portMAX_DELAY);
   this->artnetUniverse  = artnetUniverse;
   xSemaphoreGive(mutex);
@@ -136,6 +144,8 @@ boolean ConfigManager::setDmxMode(DmxMode dmxMode)
   if(this->dmxMode == dmxMode) {
     return false;
   }
+  Serial.print("Setting DMX Mode to ");
+  Serial.println(static_cast<int>(dmxMode));
   xSemaphoreTake(mutex,portMAX_DELAY);
   this->dmxMode = dmxMode;
   dmxModeUpdate(dmxMode);
@@ -146,6 +156,8 @@ boolean ConfigManager::setDmxReceiverType(DmxReceiverType dmxReceiverType){
   if(this->dmxReceiverType == dmxReceiverType) {
     return false;
   }
+  Serial.print("Setting DMX Mode to ");
+  Serial.println(static_cast<int>(dmxMode));
   xSemaphoreTake(mutex,portMAX_DELAY);
   this->dmxReceiverType = dmxReceiverType;
   receiverUpdate(dmxReceiverType);

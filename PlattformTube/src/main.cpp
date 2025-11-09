@@ -14,38 +14,52 @@
 WS2812Driver ledDriver(LED_DATA_PIN, NUM_LEDS);
 #endif
 
-// FreeRTOS
+// --------------- FREETOS ----------------
 TaskHandle_t dmxTaskHandle = nullptr;
 TaskHandle_t webTaskHandle = nullptr;
 
-// Konfiguration / Zeitbasis
-ConfigManager config{0, 0, DmxReceiverType::ARTNET, DmxMode::DMX_32};
+// ------------ Configuration -------------
+ConfigManager config{0, 0, DmxReceiverType::ARTNET, DmxMode::DMX_1}; // Only default, values loaded from EEPROM
 Ticker ticker{TICKER_INTERVAL_MILLIS};
-
-// Server (nutzt nur Referenz auf Config)
 HttpsAuthServer httpsServer(&config);
 
-// LightTube besitzt Receiver + Player via unique_ptr
-// -> vorausgesetzt: LightTube hat passende API:
-//    - setDmxReceiver(std::unique_ptr<IDMXReceiver>)
-//    - setPlayer(std::unique_ptr<DMXPlayer>)
-//    - setup(), loop()
-LightTube tube{ &ticker, &config };
+LightTube tube{&ticker, &config};
+
+// ----------------- Setup -----------------
+void connectToWifi()
+{
+  Serial.println("Connecting to WiFi");
+  WiFi.begin(WLAN_SSID, WLAN_PASSWORD);
+
+  uint32_t t0 = millis();
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(500);
+    if (millis() - t0 > 30000)
+    { // 30s hard timeout
+      Serial.println("\n[GENERAL] WiFi connect failed. Check credentials or signal.");
+      return;
+    }
+  }
+  Serial.print("\n[GENERAL] WiFi OK, IP=");
+  Serial.println(WiFi.localIP());
+}
 
 // ----------------- Tasks -----------------
-void DmxTask(void* arg)
+void DmxTask(void *arg)
 {
-  for (;;) {
+  for (;;)
+  {
     tube.loop();
-    vTaskDelay(1);
   }
 }
 
-void WebTask(void* arg)
+void WebTask(void *arg)
 {
-  for (;;) {
+  for (;;)
+  {
     httpsServer.loop();
-    vTaskDelay(1);
   }
 }
 
@@ -54,12 +68,17 @@ void updateDmxModeCallback(DmxMode dmxMode)
 {
   Serial.print("DMX Mode updated to: ");
   Serial.println(static_cast<int>(dmxMode));
-
+  
+  tube.pause();
+  
   auto newPlayer = getDMXPlayer(dmxMode, &ledDriver);
-  if (newPlayer) {
+  if (newPlayer)
+  {
     tube.setDmxPlayer(std::move(newPlayer));
     tube.setup();
-  } else {
+  }
+  else
+  {
     Serial.println("Failed to create DMXPlayer for new mode");
   }
 }
@@ -68,74 +87,89 @@ void updateReceiverCallback(DmxReceiverType dmxReceivers)
 {
   Serial.print("DMX Receiver updated to: ");
 
-  switch (dmxReceivers) {
-    case DmxReceiverType::WIRED_DMX: {
-      Serial.println("WIRED_DMX");
-      auto rx = std::make_unique<DMXMAX485>(1, DMX_RX_PIN, DMX_TX_PIN, DMX_EN_PIN);
-      tube.setDmxReceiver(std::move(rx));
-      break;
-    }
-    case DmxReceiverType::ARTNET: {
-      Serial.println("ARTNET");
-      auto rx = std::make_unique<Artnet>(&config);
-      tube.setDmxReceiver(std::move(rx));
-      break;
-    }
-    default:
-      Serial.println("Unknown");
-      return;
+
+  tube.pause();
+  switch (dmxReceivers)
+  {
+  case DmxReceiverType::WIRED_DMX:
+  {
+    Serial.println("WIRED_DMX");
+    auto rx = std::make_unique<DMXMAX485>(1, DMX_RX_PIN, DMX_TX_PIN, DMX_EN_PIN);
+    tube.setDmxReceiver(std::move(rx));
+    break;
+  }
+  case DmxReceiverType::ARTNET:
+  {
+    Serial.println("ARTNET");
+    auto rx = std::make_unique<Artnet>(&config);
+    tube.setDmxReceiver(std::move(rx));
+    break;
+  }
+  default:
+    Serial.println("Unknown");
+    return;
   }
 
-  tube.setup(); // Receiver gewechselt -> neu initialisieren
+  tube.setup();
 }
 
 // ----------------- Setup/Loop -----------------
 void setup()
 {
-  
 
   delay(1000);
   Serial.begin(115200);
   delay(1000);
-
-  Serial.println("Starting PlattformTube");
+  Serial.println("############ WiFi Init ############");
+  connectToWifi();
+   
 
   delay(1000);
-  
-  if (config.getDmxReceiverType() == DmxReceiverType::WIRED_DMX) {
+
+  if (config.getDmxReceiverType() == DmxReceiverType::WIRED_DMX)
+  {
     tube.setDmxReceiver(std::make_unique<DMXMAX485>(1, DMX_RX_PIN, DMX_TX_PIN, DMX_EN_PIN));
-  } else {
+  }
+  else
+  {
     tube.setDmxReceiver(std::make_unique<Artnet>(&config));
   }
 
   delay(1000);
 
-  // Player zum aktuellen Mode bauen
+  Serial.println("####### PlattformTube Init ########");
+
+  Serial.println("Setting DMX Player");
   tube.setDmxPlayer(getDMXPlayer(config.getDmxMode(), &ledDriver));
 
   delay(1000);
   Serial.println("Setup LightTube");
   tube.setup();
 
+  delay(1000);
+
+  Serial.println("####### Register Callback ########");
   Serial.println("Registering Callbacks");
   config.registerDmxModeUpdateCallback(updateDmxModeCallback);
   config.registerReceiverUpdateCallback(updateReceiverCallback);
 
-  Serial.println("Starting HTTPS Server");
+  Serial.println("########### HTTPS Init ###########");
   httpsServer.begin(WLAN_SSID, WLAN_PASSWORD);
 
   const UBaseType_t DMX_PRIO = 12;
   const UBaseType_t WEB_PRIO = 4;
 
-  Serial.println("Creating Tasks");
+
+  Serial.println("######## DMX Tasks Init ##########");
   xTaskCreatePinnedToCore(DmxTask, "DMX", 4096, nullptr, DMX_PRIO, &dmxTaskHandle, 0); // Core 0
-  Serial.println("Web Task Created");
-  Serial.println("Creating Web Task");
+  Serial.println("######## Web Tasks Init ##########");
   xTaskCreatePinnedToCore(WebTask, "WEB", 4096, nullptr, WEB_PRIO, &webTaskHandle, 1); // Core 1
-  Serial.println("Setup complete");
+  Serial.println("################################");
+  Serial.println("####### Setup Complete #########");
+  Serial.println("################################");
 }
 
 void loop()
 {
-  // nichts — alles in Tasks
+  // no-opt
 }
