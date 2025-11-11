@@ -15,9 +15,9 @@ public:
     virtual void loop() = 0;
     virtual void stop() = 0;
     virtual bool readData() = 0;
-    virtual uint8_t* getBuffer() = 0;
-    virtual int getBufferSize() = 0;
-    virtual uint8_t getChannel(int channel) = 0;
+    virtual uint16_t* getBuffer() = 0;
+    virtual uint16_t getBufferSize() = 0;
+    virtual uint16_t getChannel(int channel) = 0;
     virtual ~IDMXReceiver() = default;
 };
 

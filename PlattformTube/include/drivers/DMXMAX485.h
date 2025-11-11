@@ -19,9 +19,9 @@ public:
     virtual bool readData() override;
     virtual void loop() override;
     virtual void stop() override;
-    uint8_t* getBuffer() override;
-    int getBufferSize() override;
-    uint8_t getChannel(int channel) override;
+    uint16_t* getBuffer() override;
+    uint16_t getBufferSize() override;
+    uint16_t getChannel(int channel) override;
     virtual ~DMXMAX485() override;
 
 private:
@@ -30,7 +30,7 @@ private:
     int txPin;
     int enPin;
     static const int DMX_BUFFER_SIZE = DMX_PACKET_SIZE;
-    uint8_t dmxBuffer[DMX_BUFFER_SIZE];
+    uint16_t dmxBuffer[DMX_BUFFER_SIZE];
     bool dmxIsConnected = false;
 };
 

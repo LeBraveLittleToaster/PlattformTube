@@ -57,7 +57,7 @@ boolean Artnet::ConnectWifi(void)
   return state;
 }
 
-uint8_t Artnet::getChannel(int channel)
+uint16_t Artnet::getChannel(int channel)
 {
   // TODO: WHAT TO DO?!
   return -1;
@@ -75,12 +75,17 @@ void Artnet::onDmxStatic(uint16_t universe, uint16_t length,
 void Artnet::onDmx(uint16_t universe, uint16_t length,
                    uint8_t sequence, const uint8_t *data)
 {
+  if(universe != config->getArtnetUniverse()) {
+    return;
+  }
+
   for (int i = 0; i < length; i++)
   {
     dmxBuffer[i] = data[i];
-    Serial.print(dmxBuffer[i]);
-    Serial.print(" ");
+    
   }
+ 
+  
 }
 
 void Artnet::begin()
@@ -112,12 +117,12 @@ bool Artnet::readData()
   return false;
 }
 
-uint8_t *Artnet::getBuffer()
+uint16_t *Artnet::getBuffer()
 {
   return dmxBuffer;
 }
 
-int Artnet::getBufferSize()
+uint16_t Artnet::getBufferSize()
 {
   return ARTNET_PACKET_SIZE;
 }

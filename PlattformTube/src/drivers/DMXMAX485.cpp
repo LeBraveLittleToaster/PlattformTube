@@ -20,7 +20,7 @@ void DMXMAX485::begin() {
     dmx_set_pin(dmxPort, txPin, rxPin, enPin);
   }
 
-int DMXMAX485::getBufferSize(){
+uint16_t DMXMAX485::getBufferSize(){
     return 512;
 }
 
@@ -38,14 +38,14 @@ bool DMXMAX485::readData() {
     return false;
 }
 
-uint8_t* DMXMAX485::getBuffer(){
+uint16_t* DMXMAX485::getBuffer(){
   for(int i = 0; i < DMX_BUFFER_SIZE-1; ++i) {
     dmxBuffer[i] = dmxBuffer[i+1]; 
   }
   return dmxBuffer;
 }
 
-uint8_t DMXMAX485::getChannel(int channel) {
+uint16_t DMXMAX485::getChannel(int channel) {
     if (channel >= 0 && channel < DMX_BUFFER_SIZE) {
         return dmxBuffer[channel];
     }

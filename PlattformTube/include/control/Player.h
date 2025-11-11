@@ -23,7 +23,7 @@ public:
      * @param dmxMode DMX mode this player supports.
      */
     DMXPlayer(std::unique_ptr<Segment[]> segments,
-              uint8_t segmentCount,
+              uint16_t segmentCount,
               ILEDDriver* leds,
               DmxMode dmxMode)
         : dmxMode(dmxMode),
@@ -34,18 +34,18 @@ public:
 
     virtual ~DMXPlayer() = default;             // polymorph sicher
 
-    // Nicht kopierbar (Ownership eindeutig)
+    // non-copyable
     DMXPlayer(const DMXPlayer&) = delete;
     DMXPlayer& operator=(const DMXPlayer&) = delete;
 
-    // Bewegbar (Ownership-Transfer erlaubt)
+    // Moveable
     DMXPlayer(DMXPlayer&&) = default;
     DMXPlayer& operator=(DMXPlayer&&) = default;
 
     /**
      * @brief Main update loop when DMX data is present.
      */
-    virtual void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) = 0;
+    virtual void loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAddr) = 0;
 
     /**
      * @brief Update loop when no DMX data is available.
@@ -61,17 +61,16 @@ public:
     DmxMode getPlayerDmxType() const { return dmxMode; }
 
 protected:
-    // Bequemer Zugriff für abgeleitete Klassen
     Segment& segmentAt(std::size_t i)             { return segments_[i]; }
     const Segment& segmentAt(std::size_t i) const { return segments_[i]; }
     Segment* segmentsRaw()                        { return segments_.get(); }
     const Segment* segmentsRaw() const            { return segments_.get(); }
-    uint8_t segmentCount() const                  { return segmentCount_; }
+    uint16_t segmentCount() const                  { return segmentCount_; }
 
     DmxMode dmxMode;
-    std::unique_ptr<Segment[]> segments_;   ///< OWNS the array of segments
-    uint8_t segmentCount_;                  ///< Number of segments
-    ILEDDriver* driver;                     ///< Non-owning LED driver interface
+    std::unique_ptr<Segment[]> segments_;   
+    uint8_t segmentCount_;                  
+    ILEDDriver* driver;                     
 };
 
 
@@ -88,7 +87,7 @@ public:
 
     void begin() override;
     void stop() override;
-    void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
+    void loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:
@@ -109,7 +108,7 @@ public:
 
     void begin() override;
     void stop() override;
-    void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
+    void loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:
@@ -130,7 +129,7 @@ public:
 
     void begin() override;
     void stop() override;
-    void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
+    void loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:
@@ -151,7 +150,7 @@ public:
 
     void begin() override;
     void stop() override;
-    void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
+    void loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:
@@ -171,7 +170,7 @@ public:
 
     void begin() override;
     void stop() override;
-    void loopWithDMX(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAddr) override;
+    void loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAddr) override;
     void loopWithoutDMX() override;
 
 private:

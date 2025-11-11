@@ -101,8 +101,8 @@ struct DMX80 : public DMXData
 
 // --- Extraction function declarations ---
 
-std::unique_ptr<DMX1> getDMX1FromDMXBuffer(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAdr);
-std::unique_ptr<DMX5> getDMX5FromDMXBuffer(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAdr);
-std::unique_ptr<DMX30> getDMX30FromDMXBuffer(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAdr);
-std::unique_ptr<DMX40> getDMX40FromDMXBuffer(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAdr);
-std::unique_ptr<DMX80> getDMX80FromDMXBuffer(uint8_t* buffer, uint8_t bufferSize, uint8_t dmxAdr);
+std::unique_ptr<DMX1> getDMX1FromDMXBuffer(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAdr);
+std::unique_ptr<DMX5> getDMX5FromDMXBuffer(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAdr);
+std::unique_ptr<DMX30> getDMX30FromDMXBuffer(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAdr);
+std::unique_ptr<DMX40> getDMX40FromDMXBuffer(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAdr);
+std::unique_ptr<DMX80> getDMX80FromDMXBuffer(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAdr);

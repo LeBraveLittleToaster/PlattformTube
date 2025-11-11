@@ -59,16 +59,32 @@ std::unique_ptr<Segment[]> getSegments(uint8_t segmentCount, ILEDDriver* driver)
     return segments;
 }
 
-void LightTube::resume()
+void LightTube::resume(boolean beginDmxReceiver, boolean beginDmxPlayer)
 {
     Serial.println("Resume LightTube");
+    if(beginDmxPlayer && dmxPlayer != nullptr){
+        Serial.println("[LightTube resume] Starting DMX Player...");
+        dmxPlayer->begin();
+    }
+    if(beginDmxReceiver && dmxReceiver != nullptr){
+        Serial.println("[LightTube resume] Starting DMX Receiver...");
+        dmxReceiver->begin();
+    }
     isPaused = false;
     Serial.println("LightTube resumed");
 }
 
-void LightTube::pause()
+void LightTube::pause(boolean stopDmxReceiver, boolean stopDmxPlayer)
 {
     Serial.println("Pausing LightTube");
+    if(stopDmxPlayer && dmxPlayer != nullptr){
+        Serial.println("[LightTube pause] Stopping DMX Player...");
+        dmxPlayer->stop();
+    }
+    if(stopDmxReceiver && dmxReceiver != nullptr){
+        Serial.println("[LightTube pause] Stopping DMX Receiver...");
+        dmxReceiver->stop();
+    }
     isPaused = true;
     Serial.println("LightTube paused");
 }
@@ -260,10 +276,12 @@ boolean LightTube::setDmxReceiver(std::unique_ptr<IDMXReceiver> receiver)
 void LightTube::loop()
 {
     if(isPaused){
+        Serial.println("LightTube is paused, skipping loop");
         return;
     }
     if(ticker == nullptr || dmxReceiver == nullptr || dmxPlayer == nullptr)
     {
+        Serial.println("LightTube loop skipped: ticker, dmxReceiver or dmxPlayer is null");
         return;
     }
 
@@ -274,6 +292,13 @@ void LightTube::loop()
     {
         dmxReceiver->readData();
         // TODO: Varying buffer size
+        Serial.print(String(millis()) + ";");
+        for(int i = 0; i < dmxReceiver->getBufferSize(); i++)
+        {
+            Serial.print(dmxReceiver->getBuffer()[i]);
+            Serial.print(",");
+        }
+        Serial.println("");
         dmxPlayer->loopWithDMX(dmxReceiver->getBuffer(), dmxReceiver->getBufferSize(), config->getDmxAddress());
 
     }

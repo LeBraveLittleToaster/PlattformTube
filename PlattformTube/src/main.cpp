@@ -69,7 +69,7 @@ void updateDmxModeCallback(DmxMode dmxMode)
   Serial.print("DMX Mode updated to: ");
   Serial.println(static_cast<int>(dmxMode));
   
-  tube.pause();
+  tube.pause(false, true);
   
   auto newPlayer = getDMXPlayer(dmxMode, &ledDriver);
   if (newPlayer)
@@ -80,14 +80,14 @@ void updateDmxModeCallback(DmxMode dmxMode)
   {
     Serial.println("Failed to create DMXPlayer for new mode");
   }
-  tube.resume();
+  tube.resume(false, true);
 }
 
 void updateReceiverCallback(DmxReceiverType dmxReceivers)
 {
   Serial.print("DMX Receiver updated to: ");
   Serial.println(static_cast<int>(dmxReceivers));
-  tube.pause();
+  tube.pause(true, false);
   switch (dmxReceivers)
   {
   case DmxReceiverType::WIRED_DMX:
@@ -108,7 +108,7 @@ void updateReceiverCallback(DmxReceiverType dmxReceivers)
     Serial.println("Unknown");
     return;
   }
-  tube.resume();
+  tube.resume(true, false);
 }
 
 // ----------------- Setup/Loop -----------------
