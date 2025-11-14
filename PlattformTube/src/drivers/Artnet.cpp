@@ -82,11 +82,7 @@ void Artnet::onDmx(uint16_t universe, uint16_t length,
   for (int i = 0; i < length; i++)
   {
     dmxBuffer[i] = data[i];
-    Serial.print(String(data[i]) + " ");
   }
-  Serial.println("");
- 
-  
 }
 
 void Artnet::begin()

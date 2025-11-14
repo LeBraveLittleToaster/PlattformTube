@@ -88,14 +88,13 @@ void DMX30Player::stop()
 
 void DMX30Player::loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAddr)
 {
-    std::unique_ptr<DMX30> dmx = getDMX30FromDMXBuffer(buffer, bufferSize, dmxAddr);
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
     {
-        auto& dmx5 = *dmx->segments[segIdx];
+        const uint16_t adr = static_cast<uint16_t>(dmxAddr) + segIdx * 5;
         const Segment& seg = segmentAt(segIdx);
         for (int i = seg.startIdx; i <= seg.endIdx; i++)
         {
-            driver->setPixelRGB(i, dmx5.r, dmx5.g, dmx5.b, dmx5.w);
+            driver->setPixelRGB(i, buffer[adr + 1], buffer[adr + 2], buffer[adr + 3], buffer[adr + 4]);
         }
     }
     driver->show();
