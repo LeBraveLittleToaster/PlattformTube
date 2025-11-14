@@ -92,15 +92,10 @@ void DMX30Player::loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dm
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
     {
         auto& dmx5 = *dmx->segments[segIdx];
-        // TODO: Proper scaling for LED dimmers
-        const uint8_t r = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.r) + 127) / 255;
-        const uint8_t g = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.g) + 127) / 255;
-        const uint8_t b = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.b) + 127) / 255;
-
         const Segment& seg = segmentAt(segIdx);
         for (int i = seg.startIdx; i <= seg.endIdx; i++)
         {
-            driver->setPixelRGB(i, r, g, b, 0);
+            driver->setPixelRGB(i, dmx5.r, dmx5.g, dmx5.b, dmx5.w);
         }
     }
     driver->show();

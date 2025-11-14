@@ -82,8 +82,9 @@ void Artnet::onDmx(uint16_t universe, uint16_t length,
   for (int i = 0; i < length; i++)
   {
     dmxBuffer[i] = data[i];
-    
+    Serial.print(String(data[i]) + " ");
   }
+  Serial.println("");
  
   
 }
@@ -92,6 +93,11 @@ void Artnet::begin()
 {
   Serial.println("######### ARTNET Init ########");
   self_ = this;
+  for (int i = 0; i < ARTNET_PACKET_SIZE; i++)
+  {
+    dmxBuffer[i] = 0;
+    
+  }
   ConnectWifi();
 
   Serial.println("######### UDP Init ###########");

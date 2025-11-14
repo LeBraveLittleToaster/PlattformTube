@@ -292,13 +292,6 @@ void LightTube::loop()
     {
         dmxReceiver->readData();
         // TODO: Varying buffer size
-        Serial.print(String(millis()) + ";");
-        for(int i = 0; i < dmxReceiver->getBufferSize(); i++)
-        {
-            Serial.print(dmxReceiver->getBuffer()[i]);
-            Serial.print(",");
-        }
-        Serial.println("");
         dmxPlayer->loopWithDMX(dmxReceiver->getBuffer(), dmxReceiver->getBufferSize(), config->getDmxAddress());
 
     }
