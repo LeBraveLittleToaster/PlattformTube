@@ -132,31 +132,6 @@ std::unique_ptr<DMXPlayer> getDMXPlayer(DmxMode dmxMode, ILEDDriver* driver)
     return {};
 }
 
-// Example dimmer curves
-
-/**
- * @brief Linear dimmer curve (identity function).
- *
- * @param value Input brightness.
- * @return uint8_t Output brightness (unchanged).
- */
-static uint8_t dimmerCurve1(uint8_t value)
-{
-    return value;
-}
-
-/**
- * @brief Quadratic dimmer curve (S-curve).
- *
- * Makes low brightness levels more subtle, exaggerates highs.
- *
- * @param value Input brightness.
- * @return uint8_t Output brightness (curved).
- */
-static uint8_t dimmerCurve2(uint8_t value)
-{
-    return (value * value) / 255;
-}
 
 /**
  * @brief Debug print method for LightTube.

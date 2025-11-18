@@ -25,11 +25,13 @@ public:
     DMXPlayer(std::unique_ptr<Segment[]> segments,
               uint16_t segmentCount,
               ILEDDriver* leds,
-              DmxMode dmxMode)
+              DmxMode dmxMode,
+              uint16_t channelsPerSegment)
         : dmxMode(dmxMode),
           segments_(std::move(segments)),
           segmentCount_(segmentCount),
-          driver(leds)
+          driver(leds),
+          channelsPerSegment(channelsPerSegment)
     {}
 
     virtual ~DMXPlayer() = default;             // polymorph sicher
@@ -61,16 +63,14 @@ public:
     DmxMode getPlayerDmxType() const { return dmxMode; }
 
 protected:
-    Segment& segmentAt(std::size_t i)             { return segments_[i]; }
-    const Segment& segmentAt(std::size_t i) const { return segments_[i]; }
-    Segment* segmentsRaw()                        { return segments_.get(); }
-    const Segment* segmentsRaw() const            { return segments_.get(); }
     uint16_t segmentCount() const                  { return segmentCount_; }
+    Segment& segmentAt(std::size_t i)             { return segments_[i]; }
 
     DmxMode dmxMode;
     std::unique_ptr<Segment[]> segments_;   
-    uint8_t segmentCount_;                  
-    ILEDDriver* driver;                     
+    uint16_t segmentCount_;                  
+    ILEDDriver* driver;
+    uint16_t channelsPerSegment;             
 };
 
 
@@ -82,7 +82,7 @@ class DMX1Player : public DMXPlayer
 {
 public:
     DMX1Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
-        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_1) {}
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_1, 1) {}
     ~DMX1Player() override = default;
 
     void begin() override;
@@ -103,7 +103,7 @@ class DMX5Player : public DMXPlayer
 {
 public:
     DMX5Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
-        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_5) {}
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_5, 5) {}
     ~DMX5Player() override = default;
 
     void begin() override;
@@ -124,7 +124,7 @@ class DMX30Player : public DMXPlayer
 {
 public:
     DMX30Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
-        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_30) {}
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_30, 5) {}
     ~DMX30Player() override = default;
 
     void begin() override;
@@ -145,7 +145,7 @@ class DMX40Player : public DMXPlayer
 {
 public:
     DMX40Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
-        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_40) {}
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_40, 5) {}
     ~DMX40Player() override = default;
 
     void begin() override;
@@ -165,7 +165,7 @@ class DMX80Player : public DMXPlayer
 {
 public:
     DMX80Player(std::unique_ptr<Segment[]> segments, uint8_t segmentCount, ILEDDriver* leds)
-        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_80) {}
+        : DMXPlayer(std::move(segments), segmentCount, leds, DmxMode::DMX_80, 5) {}
     ~DMX80Player() override = default;
 
     void begin() override;

@@ -14,84 +14,90 @@ void DMX1Player::stop()
     Serial.println("DMX1Player stopping");
 }
 
-void DMX1Player::loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAddr)
+void DMX1Player::loopWithDMX(uint16_t *buffer, uint16_t bufferSize, uint16_t dmxAddr)
 {
-    std::unique_ptr<DMX1> dmx = getDMX1FromDMXBuffer(buffer, bufferSize, dmxAddr);
-
-    driver->setBrightness(dmx->dimmer);
-    for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
+    if (dmxAddr >= bufferSize || segmentCount() < 1)
     {
-        const Segment& seg = segmentAt(segIdx);
-        for (int i = seg.startIdx; i < seg.endIdx; i++)
-        {
-            driver->setPixelRGB(i, 255, 255, 255, 0);
-        }
+        Serial.println("DMX1Player: Invalid DMX address or no segments");
+        return;
     }
+    driver->setBrightness(buffer[dmxAddr]);
+    const Segment &seg = segmentAt(0);
+    for (int i = seg.startIdx; i < seg.endIdx; i++)
+    {
+        driver->setPixelRGB(i, 255, 255, 255, 0);
+    }
+
     driver->show();
 }
 
 void DMX1Player::loopWithoutDMX()
 {
-    // No-op for now
+    
 }
-
 
 // ========================= DMX4Player =========================
 
 void DMX5Player::begin()
 {
-    Serial.println("DMX5Player alive");
+    Serial.println("------------- DMX 5 Player -------------");
+    Serial.println("Segment count: " + String(segmentCount()));
+    Serial.println("Channels per segment: " + String(channelsPerSegment));
+    Serial.println("Total LEDs: " + String(driver->getTotalPixelCount()));
+    Serial.println("----------------------------------------");
+
     driver->begin();
 }
 
 void DMX5Player::stop()
 {
-    // optional cleanup
+    
 }
 
-void DMX5Player::loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAddr)
+void DMX5Player::loopWithDMX(uint16_t *buffer, uint16_t bufferSize, uint16_t dmxAddr)
 {
-    std::unique_ptr<DMX5> dmx = getDMX5FromDMXBuffer(buffer, bufferSize, dmxAddr);
-
-    driver->setBrightness(dmx->dimmer);
-
-    for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
+    if (segmentCount() != 1 || dmxAddr + 4 >= bufferSize)
     {
-        const Segment& seg = segmentAt(segIdx);
-        for (int i = seg.startIdx; i <= seg.endIdx; i++)
-        {
-            driver->setPixelRGB(i, dmx->r, dmx->g, dmx->b, 0);
-        }
+        Serial.println("DMX5Player: Invalid DMX address or segment count");
+        return;
     }
+    const uint16_t adr = static_cast<uint16_t>(dmxAddr);
+    const Segment &seg = segmentAt(0);
+    for (int i = seg.startIdx; i <= seg.endIdx; i++)
+    {
+        driver->setPixelRGB(i, buffer[adr + 1], buffer[adr + 2], buffer[adr + 3], buffer[adr + 4]);
+    }
+
     driver->show();
 }
 
 void DMX5Player::loopWithoutDMX()
 {
-    // No-op for now
+    
 }
-
 
 // ========================= DMX32Player =========================
 
 void DMX30Player::begin()
 {
-    Serial.println("DMX30Player alive");
-    driver->begin();
-    driver->setBrightness(255);
+    Serial.println("------------- DMX 30 Player -------------");
+    Serial.println("Segment count: " + String(segmentCount()));
+    Serial.println("Channels per segment: " + String(channelsPerSegment));
+    Serial.println("Total LEDs: " + String(driver->getTotalPixelCount()));
+    Serial.println("-----------------------------------------");
 }
 
 void DMX30Player::stop()
 {
-    // optional cleanup
+    
 }
 
-void DMX30Player::loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAddr)
+void DMX30Player::loopWithDMX(uint16_t *buffer, uint16_t bufferSize, uint16_t dmxAddr)
 {
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
     {
-        const uint16_t adr = static_cast<uint16_t>(dmxAddr) + segIdx * 5;
-        const Segment& seg = segmentAt(segIdx);
+        const uint16_t adr = static_cast<uint16_t>(dmxAddr) + segIdx * channelsPerSegment;
+        const Segment &seg = segmentAt(segIdx);
         for (int i = seg.startIdx; i <= seg.endIdx; i++)
         {
             driver->setPixelRGB(i, buffer[adr + 1], buffer[adr + 2], buffer[adr + 3], buffer[adr + 4]);
@@ -102,40 +108,34 @@ void DMX30Player::loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dm
 
 void DMX30Player::loopWithoutDMX()
 {
-    // No-op for now
+    
 }
-
 
 // ========================= DMX40Player =========================
 
 void DMX40Player::begin()
 {
-    Serial.println("DMX40Player alive");
-    driver->begin();
-    driver->setBrightness(255);
+    Serial.println("------------- DMX 40 Player -------------");
+    Serial.println("Segment count: " + String(segmentCount()));
+    Serial.println("Channels per segment: " + String(channelsPerSegment));
+    Serial.println("Total LEDs: " + String(driver->getTotalPixelCount()));
+    Serial.println("-----------------------------------------");
 }
 
 void DMX40Player::stop()
 {
-    // optional cleanup
+
 }
 
-void DMX40Player::loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAddr)
+void DMX40Player::loopWithDMX(uint16_t *buffer, uint16_t bufferSize, uint16_t dmxAddr)
 {
-    std::unique_ptr<DMX40> dmx = getDMX40FromDMXBuffer(buffer, bufferSize, dmxAddr);
-
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
     {
-        
-        auto& dmx5 = *dmx->segments[segIdx];
-
-        // TODO: Proper scaling for LED dimmers
-        
-        const Segment& seg = segmentAt(segIdx);
-        // TODO: white is ignored for now
+        const uint16_t adr = static_cast<uint16_t>(dmxAddr) + segIdx * channelsPerSegment;
+        const Segment &seg = segmentAt(segIdx);
         for (int i = seg.startIdx; i <= seg.endIdx; i++)
         {
-            driver->setPixelRGB(i, dmx5.r, dmx5.g, dmx5.b, 0);
+            driver->setPixelRGB(i, buffer[adr + 1], buffer[adr + 2], buffer[adr + 3], buffer[adr + 4]);
         }
     }
     driver->show();
@@ -157,26 +157,18 @@ void DMX80Player::begin()
 
 void DMX80Player::stop()
 {
-    // optional cleanup
+    
 }
 
-void DMX80Player::loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAddr)
+void DMX80Player::loopWithDMX(uint16_t *buffer, uint16_t bufferSize, uint16_t dmxAddr)
 {
-    std::unique_ptr<DMX80> dmx = getDMX80FromDMXBuffer(buffer, bufferSize, dmxAddr);
-
     for (int segIdx = 0; segIdx < segmentCount(); segIdx++)
     {
-        auto& dmx5 = *dmx->segments[segIdx];
-
-        // TODO: Proper scaling for LED dimmers
-        const uint8_t r = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.r) + 127) / 255;
-        const uint8_t g = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.g) + 127) / 255;
-        const uint8_t b = (static_cast<uint16_t>(dmx5.dimmer) * static_cast<uint16_t>(dmx5.b) + 127) / 255;
-
-        const Segment& seg = segmentAt(segIdx);
+        const uint16_t adr = static_cast<uint16_t>(dmxAddr) + segIdx * channelsPerSegment;
+        const Segment &seg = segmentAt(segIdx);
         for (int i = seg.startIdx; i <= seg.endIdx; i++)
         {
-            driver->setPixelRGB(i, r, g, b, 0);
+            driver->setPixelRGB(i, buffer[adr + 1], buffer[adr + 2], buffer[adr + 3], buffer[adr + 4]);
         }
     }
     driver->show();
@@ -184,6 +176,5 @@ void DMX80Player::loopWithDMX(uint16_t* buffer, uint16_t bufferSize, uint16_t dm
 
 void DMX80Player::loopWithoutDMX()
 {
-    // No-op for now
+    
 }
-

@@ -98,11 +98,3 @@ struct DMX80 : public DMXData
 
     std::unique_ptr<DMX5> segments[SEG_COUNT];
 };
-
-// --- Extraction function declarations ---
-
-std::unique_ptr<DMX1> getDMX1FromDMXBuffer(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAdr);
-std::unique_ptr<DMX5> getDMX5FromDMXBuffer(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAdr);
-std::unique_ptr<DMX30> getDMX30FromDMXBuffer(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAdr);
-std::unique_ptr<DMX40> getDMX40FromDMXBuffer(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAdr);
-std::unique_ptr<DMX80> getDMX80FromDMXBuffer(uint16_t* buffer, uint16_t bufferSize, uint16_t dmxAdr);
