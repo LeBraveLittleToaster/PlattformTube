@@ -30,6 +30,10 @@ private:
     uint16_t artnetUniverse = 1;
     uint8_t dmxReceiverType = 1;
     uint8_t dmxMode = 1;
+    uint16_t dmxAddressEEPROMAddress = 0;
+    uint16_t artnetUniverseEEPROMAddress = 2;
+    uint16_t dmxReceiverTypeEEPROMAddress = 4;
+    uint16_t dmxModeEEPROMAddress = 6;
     SemaphoreHandle_t mutex;
     void (*receiverUpdate)(DmxReceiverType dmxReceiverType);
     void (*dmxModeUpdate)(DmxMode dmxMode);

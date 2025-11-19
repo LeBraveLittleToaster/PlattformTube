@@ -4,7 +4,10 @@
 ConfigManager::ConfigManager()
 {
   mutex = xSemaphoreCreateMutex();
+  Serial.println("ConfigManager: Loading config from EEPROM");
   loadFromEEPROM();
+  Serial.println("ConfigManager: Loaded config:");
+  printConfig();
 }
 
 ConfigManager::ConfigManager(uint16_t artnetUniverse, uint16_t dmxAddr, DmxReceiverType inputType, DmxMode mode)
@@ -33,14 +36,14 @@ void ConfigManager::registerDmxModeUpdateCallback(void (*callback)(DmxMode dmxMo
  */
 void ConfigManager::loadFromEEPROM()
 {
-  EEPROM.get(0, dmxAddress);
-  EEPROM.get(2, artnetUniverse);
-  EEPROM.get(4, dmxReceiverType);
-  EEPROM.get(5, dmxMode);
-  if (dmxAddress <= 0 || dmxAddress > 512)
-    dmxAddress = 0;
-  if (artnetUniverse < 0)
-    artnetUniverse = 0;
+  EEPROM.get(dmxAddressEEPROMAddress, this->dmxAddress);
+  EEPROM.get(artnetUniverseEEPROMAddress, this->artnetUniverse);
+  EEPROM.get(dmxReceiverTypeEEPROMAddress, this->dmxReceiverType);
+  EEPROM.get(dmxModeEEPROMAddress, this->dmxMode);
+  if (this->dmxAddress <= 0 || this->dmxAddress > 512)
+    this->dmxAddress = 0;
+  if (this->artnetUniverse < 0)
+    this->artnetUniverse = 0;
 }
 
 /**
@@ -50,10 +53,10 @@ void ConfigManager::loadFromEEPROM()
  */
 void ConfigManager::saveToEEPROM()
 {
-  EEPROM.put(0, dmxAddress);
-  EEPROM.put(2, artnetUniverse);
-  EEPROM.put(4, dmxReceiverType);
-  EEPROM.put(5, dmxMode);
+  EEPROM.put(dmxAddressEEPROMAddress, this->dmxAddress);
+  EEPROM.put(artnetUniverseEEPROMAddress, this->artnetUniverse);
+  EEPROM.put(dmxReceiverTypeEEPROMAddress, this->dmxReceiverType);
+  EEPROM.put(dmxModeEEPROMAddress, this->dmxMode);
   EEPROM.commit();
 }
 
@@ -124,6 +127,7 @@ boolean ConfigManager::setDmxAddress(uint16_t dmxAddress)
   Serial.println(static_cast<int>(dmxMode));
   xSemaphoreTake(mutex,portMAX_DELAY);
   this->dmxAddress = dmxAddress;
+  saveToEEPROM();
   xSemaphoreGive(mutex);
   return true;
 }
@@ -136,6 +140,7 @@ boolean ConfigManager::setArtnetUniverse(uint16_t artnetUniverse)
   Serial.println(static_cast<int>(dmxMode));
   xSemaphoreTake(mutex,portMAX_DELAY);
   this->artnetUniverse  = artnetUniverse;
+  saveToEEPROM();
   xSemaphoreGive(mutex);
   return true;
 }
@@ -150,6 +155,7 @@ boolean ConfigManager::setDmxMode(DmxMode dmxMode)
   this->dmxMode = dmxMode;
   dmxModeUpdate(dmxMode);
   xSemaphoreGive(mutex);
+  saveToEEPROM();
   return true;
 }
 boolean ConfigManager::setDmxReceiverType(DmxReceiverType dmxReceiverType){
@@ -161,6 +167,7 @@ boolean ConfigManager::setDmxReceiverType(DmxReceiverType dmxReceiverType){
   xSemaphoreTake(mutex,portMAX_DELAY);
   this->dmxReceiverType = dmxReceiverType;
   receiverUpdate(dmxReceiverType);
+  saveToEEPROM();
   xSemaphoreGive(mutex);
   return true;
 }

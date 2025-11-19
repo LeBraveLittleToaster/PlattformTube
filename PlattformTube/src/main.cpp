@@ -19,7 +19,7 @@ TaskHandle_t dmxTaskHandle = nullptr;
 TaskHandle_t webTaskHandle = nullptr;
 
 // ------------ Configuration -------------
-ConfigManager config{0, 0, DmxReceiverType::ARTNET, DmxMode::DMX_30}; // Only default, values loaded from EEPROM
+ConfigManager config;
 Ticker ticker{TICKER_INTERVAL_MILLIS};
 HttpsAuthServer httpsServer(&config);
 
