@@ -1,24 +1,37 @@
 #include "control/ConfigManager.h"
+#include "config/HardwareConfig.h"
 #include <EEPROM.h>
+
 
 ConfigManager::ConfigManager()
 {
-  mutex = xSemaphoreCreateMutex();
-  Serial.println("ConfigManager: Loading config from EEPROM");
-  loadFromEEPROM();
-  Serial.println("ConfigManager: Loaded config:");
-  printConfig();
+  
 }
 
 ConfigManager::ConfigManager(uint16_t artnetUniverse, uint16_t dmxAddr, DmxReceiverType inputType, DmxMode mode)
 {
-  mutex = xSemaphoreCreateMutex();
-  
   this->dmxAddress = dmxAddr;
   this->artnetUniverse = artnetUniverse;
   this->dmxReceiverType = static_cast<uint8_t>(inputType);
   this->dmxMode = static_cast<uint8_t>(dmxMode);
-  saveToEEPROM();
+  
+}
+
+void ConfigManager::begin(boolean writeToPrefs)
+{
+  preferences.begin(PREFERENCE_NAMESPACE, false);
+  mutex = xSemaphoreCreateMutex();
+  if(writeToPrefs) {
+    Serial.println("ConfigManager: Saving current config to EEPROM");
+    saveToEEPROM();
+    Serial.println("ConfigManager: Saved config:");
+  }else{
+    Serial.println("ConfigManager: Loading config from EEPROM");
+    loadFromEEPROM();
+    Serial.println("ConfigManager: Loaded config:");
+  }
+  
+  printConfig();
 }
 
 void ConfigManager::registerReceiverUpdateCallback(void (*callback)(DmxReceiverType dmxReceivers)){
@@ -36,10 +49,11 @@ void ConfigManager::registerDmxModeUpdateCallback(void (*callback)(DmxMode dmxMo
  */
 void ConfigManager::loadFromEEPROM()
 {
-  EEPROM.get(dmxAddressEEPROMAddress, this->dmxAddress);
-  EEPROM.get(artnetUniverseEEPROMAddress, this->artnetUniverse);
-  EEPROM.get(dmxReceiverTypeEEPROMAddress, this->dmxReceiverType);
-  EEPROM.get(dmxModeEEPROMAddress, this->dmxMode);
+  this->dmxAddress = preferences.getUInt(dmxAddrsPref.c_str() , 0);
+  this->artnetUniverse = preferences.getUInt(artnetUniversePref.c_str() , 0);
+  this->dmxMode = preferences.getUInt(dmxModePref.c_str() , 0);
+  this->dmxReceiverType = preferences.getUInt(dmxReceiverTypePref.c_str() , 0);
+  
   if (this->dmxAddress <= 0 || this->dmxAddress > 512)
     this->dmxAddress = 0;
   if (this->artnetUniverse < 0)
@@ -53,11 +67,10 @@ void ConfigManager::loadFromEEPROM()
  */
 void ConfigManager::saveToEEPROM()
 {
-  EEPROM.put(dmxAddressEEPROMAddress, this->dmxAddress);
-  EEPROM.put(artnetUniverseEEPROMAddress, this->artnetUniverse);
-  EEPROM.put(dmxReceiverTypeEEPROMAddress, this->dmxReceiverType);
-  EEPROM.put(dmxModeEEPROMAddress, this->dmxMode);
-  EEPROM.commit();
+  preferences.putUInt(dmxAddrsPref.c_str() , this->dmxAddress);
+  preferences.putUInt(artnetUniversePref.c_str() , this->artnetUniverse);
+  preferences.putUInt(dmxModePref.c_str() , this->dmxMode);
+  preferences.putUInt(dmxReceiverTypePref.c_str() , this->dmxReceiverType);
 }
 
 /**

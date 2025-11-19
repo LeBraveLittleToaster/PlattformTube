@@ -8,6 +8,7 @@
 #include "control/Ticker.h"
 #include "control/ConfigManager.h"
 #include "drivers/DMXMAX485.h"
+#include <Preferences.h>
 
 #if defined(LED_DRIVER_WS2812)
 #include "drivers/WS2812Driver.h"
@@ -19,9 +20,11 @@ TaskHandle_t dmxTaskHandle = nullptr;
 TaskHandle_t webTaskHandle = nullptr;
 
 // ------------ Configuration -------------
-ConfigManager config;
+Preferences preferences;
+ConfigManager config{0,0, DmxReceiverType::ARTNET, DmxMode::DMX_30};
 Ticker ticker{TICKER_INTERVAL_MILLIS};
 HttpsAuthServer httpsServer(&config);
+
 
 LightTube tube{&ticker, &config};
 
@@ -115,12 +118,14 @@ void updateReceiverCallback(DmxReceiverType dmxReceivers)
 void setup()
 {
 
-  delay(1000);
+  delay(500);
   Serial.begin(115200);
-  delay(1000);
+  delay(500);
+  config.begin(false);
+  delay(500);
   Serial.println("############ WiFi Init ############");
   connectToWifi();
-   
+  
 
   delay(1000);
 
@@ -140,11 +145,11 @@ void setup()
   Serial.println("Setting DMX Player");
   tube.setDmxPlayer(getDMXPlayer(config.getDmxMode(), &ledDriver));
 
-  delay(1000);
+  delay(500);
   Serial.println("Setup LightTube");
   tube.setup();
 
-  delay(1000);
+  delay(500);
 
   Serial.println("####### Register Callback ########");
   Serial.println("Registering Callbacks");

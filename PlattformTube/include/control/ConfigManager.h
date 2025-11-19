@@ -7,11 +7,13 @@
 #include <Arduino.h>
 #include "DMXMode.h"
 #include "drivers/IDMXReceiver.h"
+#include <Preferences.h>
 
 class ConfigManager {
 public:
     ConfigManager();
     ConfigManager(uint16_t artnetUni, uint16_t dmxAddr, DmxReceiverType inputType, DmxMode mode);
+    void begin(boolean writeToPrefs);
     void printConfig();
     void loadFromEEPROM();
     void saveToEEPROM();
@@ -30,13 +32,15 @@ private:
     uint16_t artnetUniverse = 1;
     uint8_t dmxReceiverType = 1;
     uint8_t dmxMode = 1;
-    uint16_t dmxAddressEEPROMAddress = 0;
-    uint16_t artnetUniverseEEPROMAddress = 2;
-    uint16_t dmxReceiverTypeEEPROMAddress = 4;
-    uint16_t dmxModeEEPROMAddress = 6;
+    String dmxAddrsPref = "DMX_ADDR";
+    String artnetUniversePref = "ARTNET_UNI";
+    String dmxReceiverTypePref = "DMX_RX_TYPE";
+    String dmxModePref = "DMX_MODE";
     SemaphoreHandle_t mutex;
     void (*receiverUpdate)(DmxReceiverType dmxReceiverType);
     void (*dmxModeUpdate)(DmxMode dmxMode);
+    Preferences preferences;
+    
 };
 
 #endif // CONFIGMANAGER_H
