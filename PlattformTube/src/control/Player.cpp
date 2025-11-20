@@ -85,6 +85,8 @@ void DMX30Player::begin()
     Serial.println("Channels per segment: " + String(channelsPerSegment));
     Serial.println("Total LEDs: " + String(driver->getTotalPixelCount()));
     Serial.println("-----------------------------------------");
+
+    driver->begin();
 }
 
 void DMX30Player::stop()
@@ -120,6 +122,8 @@ void DMX40Player::begin()
     Serial.println("Channels per segment: " + String(channelsPerSegment));
     Serial.println("Total LEDs: " + String(driver->getTotalPixelCount()));
     Serial.println("-----------------------------------------");
+
+    driver->begin();
 }
 
 void DMX40Player::stop()
@@ -152,7 +156,6 @@ void DMX80Player::begin()
 {
     Serial.println("DMX80Player alive");
     driver->begin();
-    driver->setBrightness(255);
 }
 
 void DMX80Player::stop()

@@ -75,7 +75,7 @@ void HttpsAuthServer::begin(const char *ssid, const char *password)
   // Create server
   if (!s_server)
   {
-    s_server = new HTTPSServer(s_cert);
+    s_server = new HTTPSServer(s_cert, 443U, 2U, 0U);
   }
 
   setupRoutes();

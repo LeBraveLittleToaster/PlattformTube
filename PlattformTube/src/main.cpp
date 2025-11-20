@@ -114,20 +114,32 @@ void updateReceiverCallback(DmxReceiverType dmxReceivers)
   tube.resume(true, false);
 }
 
+void blinkInternalLEDWithDelay(int millisDelay)
+{
+  for(int i = 0; i < millisDelay / 100; i++) {
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(50);
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(50);
+    Serial.print(".");
+  }
+
+}
+
 // ----------------- Setup/Loop -----------------
 void setup()
 {
 
-  delay(500);
+  blinkInternalLEDWithDelay(500);
   Serial.begin(115200);
-  delay(500);
+  blinkInternalLEDWithDelay(500);
   config.begin(false);
-  delay(500);
+  blinkInternalLEDWithDelay(500);
   Serial.println("############ WiFi Init ############");
   connectToWifi();
   
 
-  delay(1000);
+  blinkInternalLEDWithDelay(1000);
 
   if (config.getDmxReceiverType() == DmxReceiverType::WIRED_DMX)
   {
@@ -138,18 +150,18 @@ void setup()
     tube.setDmxReceiver(std::make_unique<Artnet>(&config));
   }
 
-  delay(1000);
+  blinkInternalLEDWithDelay(1000);
 
   Serial.println("####### PlattformTube Init ########");
 
   Serial.println("Setting DMX Player");
   tube.setDmxPlayer(getDMXPlayer(config.getDmxMode(), &ledDriver));
 
-  delay(500);
+  blinkInternalLEDWithDelay(500);
   Serial.println("Setup LightTube");
   tube.setup();
 
-  delay(500);
+  blinkInternalLEDWithDelay(500);
 
   Serial.println("####### Register Callback ########");
   Serial.println("Registering Callbacks");
