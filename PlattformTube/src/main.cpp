@@ -1,7 +1,6 @@
 #include "drivers/ARTNET.h"
 #include "control/HttpsAuthServer.h"
 #include "config/HardwareConfig.h"
-
 #include <Arduino.h>
 #include "control/LightTube.h"
 #include "config/HardwareConfig.h"
@@ -10,10 +9,16 @@
 #include "drivers/DMXMAX485.h"
 #include <Preferences.h>
 
-#if defined(LED_DRIVER_WS2812)
+#if defined(LED_DRIVER_WS2812_RGB)
 #include "drivers/WS2812Driver.h"
 WS2812Driver ledDriver(LED_DATA_PIN, NUM_LEDS);
 #endif
+
+#if defined(LED_DRIVER_TM1814_RGBW)
+#include <drivers/TM1814RGBWDriver.h>
+TM1814RGBWDriver ledDriver(LED_DATA_PIN, NUM_LEDS);
+#endif
+
 
 // --------------- FREETOS ----------------
 TaskHandle_t dmxTaskHandle = nullptr;
