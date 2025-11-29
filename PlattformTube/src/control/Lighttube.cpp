@@ -275,4 +275,5 @@ void LightTube::loop()
         // TODO: need to handle what happens if no dmx signal was send over long time (3-4 ticks)
         dmxPlayer->loopWithoutDMX();
     }
+    vTaskDelay(1);
 }

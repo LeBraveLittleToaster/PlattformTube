@@ -84,9 +84,12 @@ void DMX30Player::begin()
     Serial.println("Segment count: " + String(segmentCount()));
     Serial.println("Channels per segment: " + String(channelsPerSegment));
     Serial.println("Total LEDs: " + String(driver->getTotalPixelCount()));
-    Serial.println("-----------------------------------------");
-
+    
+    Serial.println("------------- DMX 30 Driver -------------");
+    Serial.println("Driver begin called");
     driver->begin();
+    Serial.println("DMX30Player alive");
+    Serial.println("-----------------------------------------");
 }
 
 void DMX30Player::stop()

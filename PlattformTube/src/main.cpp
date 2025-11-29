@@ -8,6 +8,7 @@
 #include "control/ConfigManager.h"
 #include "drivers/DMXMAX485.h"
 #include <Preferences.h>
+#include <ESPmDNS.h>
 
 #if defined(LED_DRIVER_WS2812_RGB)
 #include "drivers/WS2812Driver.h"
@@ -16,9 +17,8 @@ WS2812Driver ledDriver(LED_DATA_PIN, NUM_LEDS);
 
 #if defined(LED_DRIVER_TM1814_RGBW)
 #include <drivers/TM1814RGBWDriver.h>
-TM1814RGBWDriver ledDriver(LED_DATA_PIN, NUM_LEDS);
+TM1814RGBWDriver ledDriver(LED_DATA_PIN_L, LED_DATA_PIN_R, NUM_LEDS);
 #endif
-
 
 // --------------- FREETOS ----------------
 TaskHandle_t dmxTaskHandle = nullptr;
@@ -26,10 +26,9 @@ TaskHandle_t webTaskHandle = nullptr;
 
 // ------------ Configuration -------------
 Preferences preferences;
-ConfigManager config{0,0, DmxReceiverType::ARTNET, DmxMode::DMX_30};
+ConfigManager config{0, 0, DmxReceiverType::ARTNET, DmxMode::DMX_30};
 Ticker ticker{TICKER_INTERVAL_MILLIS};
 HttpsAuthServer httpsServer(&config);
-
 
 LightTube tube{&ticker, &config};
 
@@ -76,9 +75,9 @@ void updateDmxModeCallback(DmxMode dmxMode)
 {
   Serial.print("DMX Mode updated to: ");
   Serial.println(static_cast<int>(dmxMode));
-  
+
   tube.pause(false, true);
-  
+
   auto newPlayer = getDMXPlayer(dmxMode, &ledDriver);
   if (newPlayer)
   {
@@ -121,14 +120,14 @@ void updateReceiverCallback(DmxReceiverType dmxReceivers)
 
 void blinkInternalLEDWithDelay(int millisDelay)
 {
-  for(int i = 0; i < millisDelay / 100; i++) {
+  for (int i = 0; i < millisDelay / 100; i++)
+  {
     digitalWrite(LED_BUILTIN, LOW);
     delay(50);
     digitalWrite(LED_BUILTIN, HIGH);
     delay(50);
     Serial.print(".");
   }
-
 }
 
 // ----------------- Setup/Loop -----------------
@@ -140,9 +139,25 @@ void setup()
   blinkInternalLEDWithDelay(500);
   config.begin(false);
   blinkInternalLEDWithDelay(500);
+
+  Serial.println("########### LED Init ###########");
+  ledDriver.begin();
+
+  Serial.println("########### Setup Init ###########");
+
   Serial.println("############ WiFi Init ############");
   connectToWifi();
-  
+
+  blinkInternalLEDWithDelay(1000);
+
+  Serial.println("############ MDNS Init ############");
+  if (!MDNS.begin(MDNS_DEVICE_NAME)) {
+      Serial.println("Error setting up MDNS responder!");
+      while(1){
+          delay(1000);
+      }
+  }
+  Serial.println("mDNS responder started");
 
   blinkInternalLEDWithDelay(1000);
 
@@ -187,9 +202,10 @@ void setup()
   Serial.println("################################");
   Serial.println("####### Setup Complete #########");
   Serial.println("################################");
+
 }
 
 void loop()
 {
-  // no-opt
+  // Empty. Everything is handled in tasks.
 }

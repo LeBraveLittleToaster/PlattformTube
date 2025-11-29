@@ -7,7 +7,7 @@
 
 class TM1814RGBWDriver : public ILEDDriver {
 public:
-    TM1814RGBWDriver(int dataPin, int numLeds);
+    TM1814RGBWDriver(int dataPinL, int dataPinR, int numLeds);
     void begin() override;
     void setBrightness(uint8_t brightness);
     void clear() override;
@@ -19,9 +19,11 @@ public:
     ~TM1814RGBWDriver();
 
 private:
-    int dataPin;
+    int dataPinL;
+    int dataPinR;
     int numLeds;
-    NeoPixelBus<NeoWrgbTm1814Feature, NeoTm1814Method> strip;
+    NeoPixelBus<NeoWrgbTm1814Feature, NeoTm1814Method> stripL;
+    NeoPixelBus<NeoWrgbTm1814Feature, NeoTm1814Method> stripR;
     NeoGamma<NeoGammaTableMethod> colorGamma;
 };
 

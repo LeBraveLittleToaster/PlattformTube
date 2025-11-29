@@ -132,6 +132,7 @@ void HttpsAuthServer::loop()
   {
     s_server->loop();
   }
+  vTaskDelay(1);
 }
 
 /* ===================== Middleware ===================== */
