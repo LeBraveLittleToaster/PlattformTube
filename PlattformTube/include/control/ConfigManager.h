@@ -12,7 +12,7 @@
 class ConfigManager {
 public:
     ConfigManager();
-    ConfigManager(uint16_t artnetUni, uint16_t dmxAddr, DmxReceiverType inputType, DmxMode mode);
+    ConfigManager(uint16_t artnetUni, uint16_t dmxAddr, DmxReceiverType inputType, DmxMode mode, char* wifiSSID, char* wifiPassword);
     void begin(boolean writeToPrefs);
     void printConfig();
     void loadFromEEPROM();
@@ -23,6 +23,9 @@ public:
     boolean setArtnetUniverse(uint16_t artnetUniverse);
     boolean setDmxMode(DmxMode dmxMode);
     boolean setDmxReceiverType(DmxReceiverType receiverType);
+    boolean setWiFiCredentials(char* ssid, char* password);
+    char* getWiFiSSID();
+    char* getWiFiPassword();
     uint16_t getDmxAddress();
     uint16_t getArtnetUniverse();
     DmxMode getDmxMode();
@@ -36,6 +39,10 @@ private:
     String artnetUniversePref = "ARTNET_UNI";
     String dmxReceiverTypePref = "DMX_RX_TYPE";
     String dmxModePref = "DMX_MODE";
+    String wifiSsidPref = "WIFI_SSID";
+    String wifiPasswordPref = "WIFI_PASSWORD";
+    char* wifiSSID = "";
+    char* wifiPassword = "";
     SemaphoreHandle_t mutex;
     void (*receiverUpdate)(DmxReceiverType dmxReceiverType);
     void (*dmxModeUpdate)(DmxMode dmxMode);

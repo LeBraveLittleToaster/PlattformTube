@@ -2,42 +2,46 @@
 #include "config/HardwareConfig.h"
 #include <EEPROM.h>
 
-
 ConfigManager::ConfigManager()
 {
-  
 }
 
-ConfigManager::ConfigManager(uint16_t artnetUniverse, uint16_t dmxAddr, DmxReceiverType inputType, DmxMode mode)
+ConfigManager::ConfigManager(uint16_t artnetUniverse, uint16_t dmxAddr, DmxReceiverType inputType, DmxMode mode, char *wifiSSID, char *wifiPassword)
 {
   this->dmxAddress = dmxAddr;
   this->artnetUniverse = artnetUniverse;
   this->dmxReceiverType = static_cast<uint8_t>(inputType);
   this->dmxMode = static_cast<uint8_t>(dmxMode);
-  
+  this->wifiSSID = wifiSSID;
+  this->wifiPassword = wifiPassword;
 }
 
 void ConfigManager::begin(boolean writeToPrefs)
 {
   preferences.begin(PREFERENCE_NAMESPACE, false);
   mutex = xSemaphoreCreateMutex();
-  if(writeToPrefs) {
+  if (writeToPrefs)
+  {
     Serial.println("ConfigManager: Saving current config to EEPROM");
     saveToEEPROM();
     Serial.println("ConfigManager: Saved config:");
-  }else{
+  }
+  else
+  {
     Serial.println("ConfigManager: Loading config from EEPROM");
     loadFromEEPROM();
     Serial.println("ConfigManager: Loaded config:");
   }
-  
+
   printConfig();
 }
 
-void ConfigManager::registerReceiverUpdateCallback(void (*callback)(DmxReceiverType dmxReceivers)){
+void ConfigManager::registerReceiverUpdateCallback(void (*callback)(DmxReceiverType dmxReceivers))
+{
   this->receiverUpdate = callback;
 }
-void ConfigManager::registerDmxModeUpdateCallback(void (*callback)(DmxMode dmxMode)){
+void ConfigManager::registerDmxModeUpdateCallback(void (*callback)(DmxMode dmxMode))
+{
   this->dmxModeUpdate = callback;
 }
 
@@ -49,11 +53,11 @@ void ConfigManager::registerDmxModeUpdateCallback(void (*callback)(DmxMode dmxMo
  */
 void ConfigManager::loadFromEEPROM()
 {
-  this->dmxAddress = preferences.getUInt(dmxAddrsPref.c_str() , 0);
-  this->artnetUniverse = preferences.getUInt(artnetUniversePref.c_str() , 0);
-  this->dmxMode = preferences.getUInt(dmxModePref.c_str() , 0);
-  this->dmxReceiverType = preferences.getUInt(dmxReceiverTypePref.c_str() , 0);
-  
+  this->dmxAddress = preferences.getUInt(dmxAddrsPref.c_str(), 0);
+  this->artnetUniverse = preferences.getUInt(artnetUniversePref.c_str(), 0);
+  this->dmxMode = preferences.getUInt(dmxModePref.c_str(), 0);
+  this->dmxReceiverType = preferences.getUInt(dmxReceiverTypePref.c_str(), 0);
+
   if (this->dmxAddress <= 0 || this->dmxAddress > 512)
     this->dmxAddress = 0;
   if (this->artnetUniverse < 0)
@@ -67,10 +71,12 @@ void ConfigManager::loadFromEEPROM()
  */
 void ConfigManager::saveToEEPROM()
 {
-  preferences.putUInt(dmxAddrsPref.c_str() , this->dmxAddress);
-  preferences.putUInt(artnetUniversePref.c_str() , this->artnetUniverse);
-  preferences.putUInt(dmxModePref.c_str() , this->dmxMode);
-  preferences.putUInt(dmxReceiverTypePref.c_str() , this->dmxReceiverType);
+  preferences.putUInt(dmxAddrsPref.c_str(), this->dmxAddress);
+  preferences.putUInt(artnetUniversePref.c_str(), this->artnetUniverse);
+  preferences.putUInt(dmxModePref.c_str(), this->dmxMode);
+  preferences.putUInt(dmxReceiverTypePref.c_str(), this->dmxReceiverType);
+  preferences.putString(wifiSsidPref.c_str(), this->wifiSSID);
+  preferences.putString(wifiPasswordPref.c_str(), this->wifiPassword);
 }
 
 /**
@@ -133,12 +139,13 @@ void ConfigManager::printConfig()
 
 boolean ConfigManager::setDmxAddress(uint16_t dmxAddress)
 {
-  if(this->dmxAddress == dmxAddress) {
+  if (this->dmxAddress == dmxAddress)
+  {
     return dmxAddress;
   }
   Serial.print("Setting DMX Mode to ");
   Serial.println(static_cast<int>(dmxMode));
-  xSemaphoreTake(mutex,portMAX_DELAY);
+  xSemaphoreTake(mutex, portMAX_DELAY);
   this->dmxAddress = dmxAddress;
   saveToEEPROM();
   xSemaphoreGive(mutex);
@@ -146,41 +153,71 @@ boolean ConfigManager::setDmxAddress(uint16_t dmxAddress)
 }
 boolean ConfigManager::setArtnetUniverse(uint16_t artnetUniverse)
 {
-  if(this->artnetUniverse == artnetUniverse) {
+  if (this->artnetUniverse == artnetUniverse)
+  {
     return dmxAddress;
   }
   Serial.print("Setting DMX Mode to ");
   Serial.println(static_cast<int>(dmxMode));
-  xSemaphoreTake(mutex,portMAX_DELAY);
-  this->artnetUniverse  = artnetUniverse;
+  xSemaphoreTake(mutex, portMAX_DELAY);
+  this->artnetUniverse = artnetUniverse;
   saveToEEPROM();
   xSemaphoreGive(mutex);
   return true;
 }
 boolean ConfigManager::setDmxMode(DmxMode dmxMode)
 {
-  if(this->dmxMode == dmxMode) {
+  if (this->dmxMode == dmxMode)
+  {
     return false;
   }
   Serial.print("Setting DMX Mode to ");
   Serial.println(static_cast<int>(dmxMode));
-  xSemaphoreTake(mutex,portMAX_DELAY);
+  xSemaphoreTake(mutex, portMAX_DELAY);
   this->dmxMode = dmxMode;
   dmxModeUpdate(dmxMode);
   xSemaphoreGive(mutex);
   saveToEEPROM();
   return true;
 }
-boolean ConfigManager::setDmxReceiverType(DmxReceiverType dmxReceiverType){
-  if(this->dmxReceiverType == dmxReceiverType) {
+boolean ConfigManager::setDmxReceiverType(DmxReceiverType dmxReceiverType)
+{
+  if (this->dmxReceiverType == dmxReceiverType)
+  {
     return false;
   }
   Serial.print("Setting DMX Mode to ");
   Serial.println(static_cast<int>(dmxMode));
-  xSemaphoreTake(mutex,portMAX_DELAY);
+  xSemaphoreTake(mutex, portMAX_DELAY);
   this->dmxReceiverType = dmxReceiverType;
   receiverUpdate(dmxReceiverType);
   saveToEEPROM();
   xSemaphoreGive(mutex);
   return true;
+}
+
+boolean ConfigManager::setWiFiCredentials(char* ssid, char* password)
+{
+ if (this->wifiSSID == ssid && this->wifiPassword == password)
+  {
+    return false;
+  }
+  Serial.print("Setting ssid and password to ");
+  Serial.print(ssid);
+  Serial.print(" / ");
+  Serial.println(password);
+  xSemaphoreTake(mutex, portMAX_DELAY);
+  this->wifiSSID = ssid;
+  this->wifiPassword = password;
+  saveToEEPROM();
+  xSemaphoreGive(mutex);
+  return true;
+}
+char* ConfigManager::getWiFiSSID()
+{
+  return this->wifiSSID;
+}
+char* ConfigManager::getWiFiPassword()
+{
+  return this->wifiPassword;
 }

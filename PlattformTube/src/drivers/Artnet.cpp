@@ -20,6 +20,10 @@ Artnet::~Artnet() {
 
 boolean Artnet::ConnectWifi(void)
 {
+  if(WiFi.getMode() == WIFI_AP) {
+    Serial.println("WiFi in AP mode, skipping connection");
+    return true;
+  }
   boolean state = true;
   int i = 0;
   if(WiFi.status() == WL_CONNECTED) {

@@ -38,7 +38,7 @@ void HttpsAuthServer::begin(const char *ssid, const char *password)
   }
 
   // WiFi up (if not already)
-  if (WiFi.status() != WL_CONNECTED)
+  if (WiFi.status() != WL_CONNECTED && WiFi.getMode() != WIFI_AP)
   {
     Serial.println("[HTTPS] Connecting WiFi...");
     WiFi.begin(ssid, password);
@@ -61,7 +61,7 @@ void HttpsAuthServer::begin(const char *ssid, const char *password)
   }
   else
   {
-    Serial.print("[HTTPS] WiFi already connected, IP=");
+    Serial.print("[HTTPS] WiFi already connected or in AP mode, IP=");
     Serial.println(WiFi.localIP());
   }
 

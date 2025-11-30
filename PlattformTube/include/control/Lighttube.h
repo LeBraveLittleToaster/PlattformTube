@@ -77,8 +77,7 @@ public:
     void pause(boolean stopDmxReceiver, boolean stopDmxPlayer);
 
     void resume(boolean beginDmxReceiver, boolean beginDmxPlayer);
-
-    
+   
     boolean setDmxPlayer(std::unique_ptr<DMXPlayer> player);
 
     boolean setDmxReceiver(std::unique_ptr<IDMXReceiver> receiver);

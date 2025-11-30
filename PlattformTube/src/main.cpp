@@ -26,31 +26,50 @@ TaskHandle_t webTaskHandle = nullptr;
 
 // ------------ Configuration -------------
 Preferences preferences;
-ConfigManager config{0, 0, DmxReceiverType::ARTNET, DmxMode::DMX_30};
+ConfigManager config{0, 0, DmxReceiverType::ARTNET, DmxMode::DMX_30, "",""};
 Ticker ticker{TICKER_INTERVAL_MILLIS};
 HttpsAuthServer httpsServer(&config);
 
 LightTube tube{&ticker, &config};
 
 // ----------------- Setup -----------------
-void connectToWifi()
+bool createWiFiAP()
+{
+  Serial.println("Creating WiFi AP");
+  WiFi.mode(WIFI_AP);
+  bool result = WiFi.softAP(WLAN_SSID, WLAN_PASSWORD);
+  if (result)
+  {
+    Serial.print("[GENERAL] WiFi AP created, IP=");
+    Serial.println(WiFi.softAPIP());
+  }
+  else
+  {
+    Serial.println("[GENERAL] WiFi AP creation failed.");
+  }
+  return result;
+}
+
+bool connectToWifi()
 {
   Serial.println("Connecting to WiFi");
-  WiFi.begin(WLAN_SSID, WLAN_PASSWORD);
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(config.getWiFiSSID(), config.getWiFiPassword());
 
   uint32_t t0 = millis();
   while (WiFi.status() != WL_CONNECTED)
   {
     Serial.print(".");
     delay(500);
-    if (millis() - t0 > 30000)
-    { // 30s hard timeout
+    if (millis() - t0 > WLAN_STA_CONNECT_TIMEOUT_MS)
+    {
       Serial.println("\n[GENERAL] WiFi connect failed. Check credentials or signal.");
-      return;
+      return false;
     }
   }
   Serial.print("\n[GENERAL] WiFi OK, IP=");
   Serial.println(WiFi.localIP());
+  return true;
 }
 
 // ----------------- Tasks -----------------
@@ -118,48 +137,48 @@ void updateReceiverCallback(DmxReceiverType dmxReceivers)
   tube.resume(true, false);
 }
 
-void blinkInternalLEDWithDelay(int millisDelay)
-{
-  for (int i = 0; i < millisDelay / 100; i++)
-  {
-    digitalWrite(LED_BUILTIN, LOW);
-    delay(50);
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(50);
-    Serial.print(".");
-  }
-}
-
 // ----------------- Setup/Loop -----------------
 void setup()
 {
 
-  blinkInternalLEDWithDelay(500);
+  delay(500);
   Serial.begin(115200);
-  blinkInternalLEDWithDelay(500);
+  delay(500);
   config.begin(false);
-  blinkInternalLEDWithDelay(500);
+  delay(500);
 
   Serial.println("########### LED Init ###########");
   ledDriver.begin();
 
-  Serial.println("########### Setup Init ###########");
-
   Serial.println("############ WiFi Init ############");
-  connectToWifi();
 
-  blinkInternalLEDWithDelay(1000);
+  bool isConnected = connectToWifi();
+  if (!isConnected)
+  {
+    Serial.println("Failed to connect to WiFi. Creating AP...");
+    bool isApCreated = createWiFiAP();
+    if (!isApCreated)
+    {
+      Serial.println("Failed to connect to WiFi and create AP. Restarting...");
+      delay(2000);
+      ESP.restart();
+    }
+  }
+
+  delay(1000);
 
   Serial.println("############ MDNS Init ############");
-  if (!MDNS.begin(MDNS_DEVICE_NAME)) {
-      Serial.println("Error setting up MDNS responder!");
-      while(1){
-          delay(1000);
-      }
+  if (!MDNS.begin(MDNS_DEVICE_NAME))
+  {
+    Serial.println("Error setting up MDNS responder!");
+    while (1)
+    {
+      delay(1000);
+    }
   }
   Serial.println("mDNS responder started");
 
-  blinkInternalLEDWithDelay(1000);
+  delay(1000);
 
   if (config.getDmxReceiverType() == DmxReceiverType::WIRED_DMX)
   {
@@ -170,23 +189,23 @@ void setup()
     tube.setDmxReceiver(std::make_unique<Artnet>(&config));
   }
 
-  blinkInternalLEDWithDelay(1000);
+  delay(1000);
 
   Serial.println("####### PlattformTube Init ########");
 
   Serial.println("Setting DMX Player");
   tube.setDmxPlayer(getDMXPlayer(config.getDmxMode(), &ledDriver));
 
-  blinkInternalLEDWithDelay(500);
+  delay(500);
   Serial.println("Setup LightTube");
   tube.setup();
 
-  blinkInternalLEDWithDelay(500);
+  delay(500);
 
   Serial.println("####### Register Callback ########");
-  Serial.println("Registering Callbacks");
   config.registerDmxModeUpdateCallback(updateDmxModeCallback);
   config.registerReceiverUpdateCallback(updateReceiverCallback);
+  WiFi.setAutoReconnect(true);
 
   Serial.println("########### HTTPS Init ###########");
   httpsServer.begin(WLAN_SSID, WLAN_PASSWORD);
@@ -194,6 +213,7 @@ void setup()
   const UBaseType_t DMX_PRIO = 12;
   const UBaseType_t WEB_PRIO = 4;
 
+  
 
   Serial.println("######## DMX Tasks Init ##########");
   xTaskCreatePinnedToCore(DmxTask, "DMX", 4096, nullptr, DMX_PRIO, &dmxTaskHandle, 0); // Core 0
@@ -202,10 +222,9 @@ void setup()
   Serial.println("################################");
   Serial.println("####### Setup Complete #########");
   Serial.println("################################");
-
 }
 
 void loop()
 {
-  // Empty. Everything is handled in tasks.
+  
 }
