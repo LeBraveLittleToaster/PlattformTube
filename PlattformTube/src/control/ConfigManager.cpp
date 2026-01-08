@@ -57,6 +57,7 @@ void ConfigManager::loadFromEEPROM()
   this->artnetUniverse = preferences.getUInt(artnetUniversePref.c_str(), 0);
   this->dmxMode = preferences.getUInt(dmxModePref.c_str(), 0);
   this->dmxReceiverType = preferences.getUInt(dmxReceiverTypePref.c_str(), 0);
+  this->keepAliveBuffer = preferences.getBool(keepAliveBufferPref.c_str(), false);
 
   if (this->dmxAddress <= 0 || this->dmxAddress > 512)
     this->dmxAddress = 0;
@@ -77,6 +78,11 @@ void ConfigManager::saveToEEPROM()
   preferences.putUInt(dmxReceiverTypePref.c_str(), this->dmxReceiverType);
   preferences.putString(wifiSsidPref.c_str(), this->wifiSSID);
   preferences.putString(wifiPasswordPref.c_str(), this->wifiPassword);
+  preferences.putBool(keepAliveBufferPref.c_str(), this->keepAliveBuffer);
+}
+
+boolean ConfigManager::getKeepAliveBuffer() {
+  return this->keepAliveBuffer;
 }
 
 /**
@@ -134,7 +140,22 @@ void ConfigManager::printConfig()
   Serial.print("dmxMode: ");
   Serial.print(dmxMode);
   Serial.println(", available modes: 0=DMX_1, 1=DMX_5, 2=DMX_30, 3=DMX_40, 4=DMX_80");
+  Serial.println(keepAliveBuffer ? "KeepAlive Buffer: true" : "KeepAlive Buffer: false");
   Serial.println("################################");
+}
+
+boolean ConfigManager::setKeepAliveBuffer(boolean keepAliveBuffer) {
+if (this->keepAliveBuffer == keepAliveBuffer)
+  {
+    return keepAliveBuffer;
+  }
+  Serial.print("Setting KeepAlive Buffer to ");
+  Serial.println(static_cast<int>(keepAliveBuffer));
+  xSemaphoreTake(mutex, portMAX_DELAY);
+  this->keepAliveBuffer = keepAliveBuffer;
+  saveToEEPROM();
+  xSemaphoreGive(mutex);
+  return true;
 }
 
 boolean ConfigManager::setDmxAddress(uint16_t dmxAddress)

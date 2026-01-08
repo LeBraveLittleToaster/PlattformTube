@@ -49,8 +49,9 @@
 // Only one driver should be enabled at a time.
 //---------------------------------------------------------
 
-#define LED_DRIVER_WS2812_RGB
-// #define LED_DRIVER_TM1814_RGBW
+//#define LED_DRIVER_WS2812_RGB
+#define LED_DRIVER_TM1814_RGBW
+//#define LED_DRIVER_SK6812_RGBW
 
 
 //---------------------------------------------------------

@@ -12,12 +12,16 @@
 
 #if defined(LED_DRIVER_WS2812_RGB)
 #include "drivers/WS2812Driver.h"
-WS2812Driver ledDriver(LED_DATA_PIN, NUM_LEDS);
+WS2812Driver ledDriver(LED_DATA_PIN_L, NUM_LEDS);
 #endif
 
 #if defined(LED_DRIVER_TM1814_RGBW)
 #include <drivers/TM1814RGBWDriver.h>
 TM1814RGBWDriver ledDriver(LED_DATA_PIN_L, LED_DATA_PIN_R, NUM_LEDS);
+#endif
+#if defined(LED_DRIVER_SK6812_RGBW)
+#include <drivers/SK6812RGBWDriver.h>
+SK6812RGBWDriver ledDriver(LED_DATA_PIN_L, NUM_LEDS);
 #endif
 
 // --------------- FREETOS ----------------
@@ -26,7 +30,7 @@ TaskHandle_t webTaskHandle = nullptr;
 
 // ------------ Configuration -------------
 Preferences preferences;
-ConfigManager config{0, 0, DmxReceiverType::ARTNET, DmxMode::DMX_30, "",""};
+ConfigManager config{0, 0, DmxReceiverType::ARTNET, DmxMode::DMX_30, "", ""};
 Ticker ticker{TICKER_INTERVAL_MILLIS};
 HttpsAuthServer httpsServer(&config);
 
@@ -150,6 +154,7 @@ void setup()
   Serial.println("########### LED Init ###########");
   ledDriver.begin();
 
+  /*
   Serial.println("############ WiFi Init ############");
 
   bool isConnected = connectToWifi();
@@ -202,6 +207,7 @@ void setup()
 
   delay(500);
 
+
   Serial.println("####### Register Callback ########");
   config.registerDmxModeUpdateCallback(updateDmxModeCallback);
   config.registerReceiverUpdateCallback(updateReceiverCallback);
@@ -213,7 +219,7 @@ void setup()
   const UBaseType_t DMX_PRIO = 12;
   const UBaseType_t WEB_PRIO = 4;
 
-  
+
 
   Serial.println("######## DMX Tasks Init ##########");
   xTaskCreatePinnedToCore(DmxTask, "DMX", 4096, nullptr, DMX_PRIO, &dmxTaskHandle, 0); // Core 0
@@ -222,9 +228,57 @@ void setup()
   Serial.println("################################");
   Serial.println("####### Setup Complete #########");
   Serial.println("################################");
+
+
+  */
 }
+
+const uint16_t FRAME_MS = 23 * 5; // frame delay in milliseconds
 
 void loop()
 {
-  
+  ledDriver.setBrightness(255);
+  for (int i = 0; i < ledDriver.getTotalPixelCount(); i++)
+  {
+    ledDriver.setPixelRGB(i, 255, 255, 255, 0);
+    ledDriver.show();
+    delay(FRAME_MS);
+  }
+  delay(5000);
+  ledDriver.clear();
+
+  for (int i = 0; i < ledDriver.getTotalPixelCount(); i++)
+  {
+    ledDriver.setPixelRGB(i, 255, 0, 0, 0);
+    ledDriver.show();
+    delay(FRAME_MS);
+  }
+  delay(5000);
+
+  ledDriver.clear();
+  for (int i = 0; i < ledDriver.getTotalPixelCount(); i++)
+  {
+    ledDriver.setPixelRGB(i, 0, 255, 0, 0);
+    ledDriver.show();
+    delay(FRAME_MS);
+  }
+  delay(5000);
+
+  ledDriver.clear();
+  for (int i = 0; i < ledDriver.getTotalPixelCount(); i++)
+  {
+    ledDriver.setPixelRGB(i, 0,0, 255, 0);
+    ledDriver.show();
+    delay(FRAME_MS);
+  }
+  delay(5000);
+  ledDriver.clear();
+  for (int i = 0; i < ledDriver.getTotalPixelCount(); i++)
+  {
+    ledDriver.setPixelRGB(i, 0,0, 0, 255);
+    ledDriver.show();
+    delay(FRAME_MS);
+  }
+  delay(5000);
+  ledDriver.clear();
 }

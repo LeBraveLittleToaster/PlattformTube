@@ -24,6 +24,8 @@ public:
     boolean setDmxMode(DmxMode dmxMode);
     boolean setDmxReceiverType(DmxReceiverType receiverType);
     boolean setWiFiCredentials(char* ssid, char* password);
+    boolean setKeepAliveBuffer(boolean keepAlive);
+    boolean getKeepAliveBuffer();
     char* getWiFiSSID();
     char* getWiFiPassword();
     uint16_t getDmxAddress();
@@ -31,10 +33,12 @@ public:
     DmxMode getDmxMode();
     DmxReceiverType getDmxReceiverType();
 private:
+    boolean keepAliveBuffer = false;
     uint16_t dmxAddress = 1;
     uint16_t artnetUniverse = 1;
     uint8_t dmxReceiverType = 1;
     uint8_t dmxMode = 1;
+    String keepAliveBufferPref = "KEEP_ALIVE_BUFFER";
     String dmxAddrsPref = "DMX_ADDR";
     String artnetUniversePref = "ARTNET_UNI";
     String dmxReceiverTypePref = "DMX_RX_TYPE";

@@ -266,7 +266,7 @@ void LightTube::loop()
     if (ticker->isTickReady())
     {
         dmxReceiver->readData();
-        // TODO: Varying buffer size
+        
         dmxPlayer->loopWithDMX(dmxReceiver->getBuffer(), dmxReceiver->getBufferSize(), config->getDmxAddress());
 
     }
